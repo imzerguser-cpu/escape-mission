@@ -1,0 +1,1457 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>🔑 미션 방탈출</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&family=Nanum+Gothic:wght@400;700;800&display=swap');
+:root{--navy:#1B2E4A;--navy-l:#2A4470;--navy-g:#3B6BA5;--sky:#4DA3E8;--sky-p:#E8F4FD;--red:#E0465A;--green:#2DAA6E;--orange:#E8833A;--gold:#D4A017;--purple:#B15CFF;--bg:#F3F5F8;--card:#FFF;--tx:#1E2D3D;--tx2:#6B7D8F;--tx3:#A4B3C2;--bdr:#E0E7EF;--sh:0 1px 4px rgba(27,46,74,.07);--r:12px;}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html{font-size:16px;}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);line-height:1.5;min-height:100vh;overflow-x:hidden;}
+
+/* ===== 학생 화면 (#studentRoot 스코프) — 유령 학교의 저주 테마 ===== */
+#studentRoot{
+  --gs-bg:#120d21;
+  --gs-ink:#efe6cf;
+  --gs-gold:#ffcf7a;
+  --gs-gold-lt:#ffe9b8;
+  --gs-lilac:#c9b9e8;
+  --gs-lilac-lt:#e2c6ff;
+  --gs-green:#9ce6b4;
+  --gs-red:#ff8fa0;
+  --gs-parchment-1:rgba(236,220,180,.96);
+  --gs-parchment-2:rgba(214,193,146,.96);
+  --gs-ink-brown:#3f2c14;
+  --gs-ink-brown-2:#5f4a26;
+  --gs-stone-1:rgba(58,40,96,.9);
+  --gs-stone-2:rgba(34,23,62,.92);
+  --gs-stone-border:rgba(255,205,130,.4);
+  --gs-success-1:rgba(60,86,58,.9);
+  --gs-success-2:rgba(28,48,32,.92);
+  --gs-success-border:rgba(140,230,160,.5);
+  position:relative;
+  background:var(--gs-bg);
+  color:var(--gs-ink);
+  font-family:'Nanum Gothic',sans-serif;
+  min-height:100vh;
+}
+#studentRoot h1,#studentRoot h2,#studentRoot h3{font-family:'Nanum Myeongjo',serif;}
+
+@keyframes gs-drift{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes gs-flicker{0%,100%{opacity:.9}45%{opacity:1}70%{opacity:.74}}
+@keyframes gs-twinkle{0%,100%{opacity:.55;transform:scale(.94)}50%{opacity:1;transform:scale(1.05)}}
+#studentRoot .gs-drift{animation:gs-drift 6s ease-in-out infinite;}
+#studentRoot .gs-flicker{animation:gs-flicker 2.8s infinite;}
+#studentRoot .gs-twinkle{animation:gs-twinkle 2.6s ease-in-out infinite;}
+@media (prefers-reduced-motion: reduce){
+  #studentRoot .gs-drift,#studentRoot .gs-flicker,#studentRoot .gs-twinkle{animation:none!important;}
+}
+
+/* 배경 장면 (data-scene 속성으로 전환) */
+#studentRoot[data-scene="gate"]{
+  background-image:linear-gradient(180deg,rgba(18,13,33,.35),rgba(18,13,33,.82)),url('assets/background_castle_gate.png');
+  background-size:cover,cover;background-position:center,center;background-repeat:no-repeat,no-repeat;background-attachment:fixed,fixed;
+}
+#studentRoot[data-scene="village"]{
+  background-image:linear-gradient(180deg,rgba(18,13,33,.4),rgba(18,13,33,.85)),url('assets/background_classroom_select.png');
+  background-size:cover,cover;background-position:center,center;background-repeat:no-repeat,no-repeat;background-attachment:fixed,fixed;
+}
+#studentRoot[data-scene="corridor"]{
+  background-image:linear-gradient(180deg,rgba(18,13,33,.3),rgba(18,13,33,.8)),url('assets/background_mission_select.png');
+  background-size:cover,cover;background-position:center,center;background-repeat:no-repeat,no-repeat;background-attachment:fixed,fixed;
+}
+#studentRoot[data-scene="study"]{
+  background-image:linear-gradient(180deg,rgba(18,13,33,.35),rgba(18,13,33,.82)),url('assets/background_problem_example.png');
+  background-size:cover,cover;background-position:center,center;background-repeat:no-repeat,no-repeat;background-attachment:fixed,fixed;
+}
+#studentRoot[data-scene="guide"]{
+  background-image:linear-gradient(180deg,rgba(18,13,33,.3),rgba(18,13,33,.8)),url('assets/background_mission_guide.png');
+  background-size:cover,cover;background-position:center,center;background-repeat:no-repeat,no-repeat;background-attachment:fixed,fixed;
+}
+
+#studentRoot .decor-img{position:fixed;z-index:-1;pointer-events:none;}
+
+#studentRoot .hd{background:linear-gradient(180deg,#1b1430,#120d21);color:var(--gs-gold-lt);padding:12px 16px;position:sticky;top:0;z-index:50;box-shadow:0 2px 16px rgba(0,0,0,.6);display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid rgba(255,205,130,.35);}
+#studentRoot .hd-l{display:flex;flex-direction:column;}
+#studentRoot .hd-title{font-family:'Nanum Myeongjo',serif;font-size:16px;font-weight:800;color:var(--gs-gold-lt);text-shadow:0 2px 6px rgba(0,0,0,.7);}
+#studentRoot .hd-team{font-size:11px;color:var(--gs-lilac);margin-top:1px;}
+#studentRoot .sync-ind{font-size:10px;color:var(--gs-lilac);display:flex;align-items:center;gap:4px;}
+#studentRoot .sync-dot{width:7px;height:7px;border-radius:50%;display:inline-block;}
+#studentRoot .sync-on{background:#7ee39c;box-shadow:0 0 8px rgba(126,227,156,.9);}
+#studentRoot .sync-off{background:#f0c05a;}
+#studentRoot .sync-err{background:#ff6b7a;}
+#studentRoot .wrap{max-width:640px;margin:0 auto;padding:16px 14px 40px;position:relative;z-index:1;}
+
+#studentRoot .btn{border:none;border-radius:10px;cursor:pointer;font-family:'Nanum Gothic',sans-serif;font-weight:800;transition:.12s;}
+#studentRoot .btn:active{transform:scale(.97);}
+#studentRoot .btn:disabled{opacity:.55;cursor:default;}
+#studentRoot .btn-lg{padding:16px;font-size:17px;width:100%;}
+#studentRoot .btn-primary{background:linear-gradient(180deg,#ffe9b8,#d9a03e);color:#3f2c14;box-shadow:0 6px 16px rgba(0,0,0,.45);}
+#studentRoot .btn-sub{background:rgba(46,32,80,.7);color:var(--gs-gold-lt);border:2px solid rgba(255,205,130,.4);}
+#studentRoot .btn-danger{background:#c94a5a;color:#fff4dc;}
+#studentRoot .btn-green{background:linear-gradient(180deg,#bdf0cd,#5fb87e);color:#173821;}
+
+#studentRoot .card{background-image:linear-gradient(170deg,var(--gs-parchment-1),var(--gs-parchment-2));border-radius:14px;box-shadow:0 14px 32px rgba(0,0,0,.55);padding:18px;margin-bottom:14px;color:var(--gs-ink-brown);border:1px solid rgba(140,105,55,.35);}
+#studentRoot .card h2{color:var(--gs-ink-brown);}
+#studentRoot .card p{color:var(--gs-ink-brown-2);}
+
+#studentRoot .hero-block{display:flex;flex-direction:column;align-items:center;padding:22px 16px 26px;position:relative;z-index:1;}
+#studentRoot .wood-sign-wrap{position:relative;display:inline-block;}
+#studentRoot .wood-sign-img{display:block;width:190px;}
+#studentRoot .wood-sign-label{position:absolute;left:0;right:0;top:32%;text-align:center;font-family:'Nanum Myeongjo',serif;font-size:20px;font-weight:800;color:var(--gs-gold-lt);text-shadow:0 2px 4px rgba(0,0,0,.8);}
+#studentRoot .hero-title{margin-top:18px;font-family:'Nanum Myeongjo',serif;font-size:34px;font-weight:800;line-height:1.3;color:#fff4dc;text-shadow:0 0 20px rgba(255,190,90,.6),0 4px 10px rgba(0,0,0,.85);text-align:center;white-space:nowrap;}
+#studentRoot .hero-sub{margin-top:10px;font-family:'Nanum Gothic',sans-serif;font-size:16px;font-weight:700;letter-spacing:.08em;color:var(--gs-lilac-lt);text-shadow:0 2px 8px rgba(0,0,0,.8);text-align:center;}
+#studentRoot[data-scene="village"] .hero-sub{font-family:'Nanum Myeongjo',serif;font-size:26px;font-weight:800;letter-spacing:0;white-space:nowrap;}
+@media (max-width:700px){
+  #studentRoot .hero-title{font-size:26px;}
+  #studentRoot[data-scene="village"] .hero-sub{font-size:20px;}
+}
+
+#studentRoot .team-btn{width:100%;padding:12px 22px 12px 14px;border-radius:10px;border:none;cursor:pointer;font-family:'Nanum Gothic',sans-serif;background-image:linear-gradient(100deg,var(--gs-parchment-1),var(--gs-parchment-2));box-shadow:0 6px 18px rgba(0,0,0,.5);display:flex;align-items:center;gap:16px;text-align:left;transition:.12s;}
+#studentRoot .team-btn:active{transform:scale(.98);}
+#studentRoot .team-btn-icon{width:44px;flex:none;filter:drop-shadow(0 3px 5px rgba(0,0,0,.45));}
+#studentRoot .team-btn-body{min-width:0;display:flex;flex-direction:column;gap:2px;}
+#studentRoot .team-btn-name{font-family:'Nanum Myeongjo',serif;font-size:18px;font-weight:800;color:var(--gs-ink-brown);}
+#studentRoot .team-btn-members{font-size:12.5px;color:var(--gs-ink-brown-2);line-height:1.4;word-break:keep-all;}
+
+#studentRoot[data-scene="village"] .wrap{max-width:1040px;}
+#studentRoot[data-scene="corridor"] .wrap{max-width:1040px;}
+#studentRoot .stage{display:flex;gap:32px;align-items:flex-start;flex-wrap:wrap;}
+#studentRoot .room-grid-3col{flex:1 1 480px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-content:start;}
+#studentRoot .scan-btn-img{width:100%;max-width:200px;filter:drop-shadow(0 6px 14px rgba(0,0,0,.6));cursor:pointer;display:block;margin:0 auto;}
+#studentRoot .room-card{background-image:linear-gradient(170deg,var(--gs-stone-1),var(--gs-stone-2));border-radius:14px;box-shadow:0 10px 26px rgba(0,0,0,.55);padding:16px 12px;text-align:center;border:2px solid var(--gs-stone-border);cursor:pointer;color:var(--gs-gold-lt);}
+#studentRoot .room-card.done{border-color:var(--gs-success-border);background-image:linear-gradient(170deg,var(--gs-success-1),var(--gs-success-2));color:#e6ffe9;}
+/* 교실 카드 배경을 사진으로 쓸 때: 하단만 어둡게 그라디언트를 얹어 진행도 글자가 늘 잘 보이게 함 */
+#studentRoot .room-card.has-photo{background-image:linear-gradient(180deg,rgba(15,10,25,.05) 0%,rgba(15,10,25,.15) 55%,rgba(8,6,15,.92) 100%),var(--room-photo);background-size:cover;background-position:center;border-color:rgba(255,205,130,.55);}
+#studentRoot .room-card.has-photo.done{background-image:linear-gradient(180deg,rgba(20,60,30,.1) 0%,rgba(15,50,25,.3) 55%,rgba(8,45,18,.88) 100%),var(--room-photo);}
+#studentRoot .final-card.has-photo{background-image:linear-gradient(180deg,rgba(15,10,25,.05) 0%,rgba(15,10,25,.15) 55%,rgba(8,6,15,.92) 100%),var(--room-photo);background-size:cover;background-position:center;}
+#studentRoot .final-card.has-photo.done{background-image:linear-gradient(180deg,rgba(20,60,30,.1) 0%,rgba(15,50,25,.3) 55%,rgba(8,45,18,.88) 100%),var(--room-photo);}
+#studentRoot[data-scene="village"] .room-card.has-photo,#studentRoot[data-scene="village"] .final-card.has-photo{justify-content:flex-end;}
+#studentRoot .room-emoji{font-size:32px;}
+/* 홈 화면(village)만: 가로 폭이 넓을 때 오른쪽 교실 카드가 화면 아래 여백 없이 꽉 차도록 세로로도 늘림 */
+#studentRoot[data-scene="village"]{display:flex;flex-direction:column;}
+#studentRoot[data-scene="village"] .wrap{flex:1;display:flex;flex-direction:column;}
+#studentRoot[data-scene="village"] .stage{flex:1;align-items:stretch;}
+#studentRoot[data-scene="village"] .side-panel{justify-content:center;}
+#studentRoot[data-scene="village"] .room-grid-3col{grid-template-rows:repeat(2,1fr);}
+#studentRoot[data-scene="village"] .room-card,#studentRoot[data-scene="village"] .final-card{display:flex;flex-direction:column;justify-content:center;}
+#studentRoot .room-emoji img{width:56px;filter:drop-shadow(0 6px 10px rgba(0,0,0,.55));}
+#studentRoot .room-name{font-family:'Nanum Myeongjo',serif;font-size:14px;font-weight:800;margin-top:4px;}
+#studentRoot .room-prog{font-size:12px;color:var(--gs-lilac);margin-top:4px;font-weight:700;}
+#studentRoot .room-card.done .room-prog{color:var(--gs-green);}
+#studentRoot .room-bar{height:6px;background:rgba(0,0,0,.35);border-radius:3px;margin-top:6px;overflow:hidden;}
+#studentRoot .room-bar-f{height:100%;background:var(--gs-gold);border-radius:3px;transition:width .3s;}
+#studentRoot .room-card.done .room-bar-f{background:var(--gs-green);}
+#studentRoot .final-card{background-image:linear-gradient(170deg,var(--gs-stone-1),var(--gs-stone-2));border-radius:14px;box-shadow:0 10px 26px rgba(0,0,0,.55);padding:16px 12px;text-align:center;border:2px solid var(--gs-gold);cursor:pointer;color:var(--gs-gold-lt);}
+#studentRoot .final-card.done{border-color:var(--gs-success-border);background-image:linear-gradient(170deg,var(--gs-success-1),var(--gs-success-2));color:#e6ffe9;}
+
+#studentRoot .team-switch{font-size:11px;color:var(--gs-lilac);text-align:center;margin-top:18px;text-decoration:underline;cursor:pointer;}
+
+#studentRoot .scan-wrap{text-align:center;position:relative;z-index:1;}
+#studentRoot .cam-box{position:relative;width:100%;max-width:420px;margin:10px auto;border-radius:16px;overflow:hidden;background:#000;aspect-ratio:1/1;border:4px solid var(--gs-gold);box-shadow:0 0 24px rgba(255,205,120,.35),0 14px 30px rgba(0,0,0,.6);}
+#studentRoot .cam-box video{width:100%;height:100%;object-fit:cover;}
+#studentRoot .cam-frame{position:absolute;inset:14%;border:3px solid var(--gs-gold-lt);border-radius:16px;box-shadow:0 0 0 999px rgba(0,0,0,.45);}
+#studentRoot .cam-msg{font-size:12px;color:var(--gs-lilac);margin:8px 0;}
+#studentRoot .manual-box{background-image:linear-gradient(170deg,var(--gs-parchment-1),var(--gs-parchment-2));border-radius:12px;box-shadow:0 10px 24px rgba(0,0,0,.5);padding:14px;margin-top:16px;color:var(--gs-ink-brown);}
+#studentRoot .manual-box h4{font-size:13px;color:var(--gs-ink-brown-2);margin-bottom:8px;font-weight:700;}
+#studentRoot .manual-row{display:flex;gap:8px;}
+
+#studentRoot .txt-inp{flex:1;padding:12px;border:2px solid rgba(140,105,55,.4);border-radius:10px;font-size:16px;font-family:'Nanum Gothic',sans-serif;text-transform:uppercase;background:#fffaf0;color:var(--gs-ink-brown);}
+#studentRoot .txt-inp:focus{border-color:var(--gs-gold);outline:none;}
+
+#studentRoot .q-badges{display:flex;gap:6px;align-items:center;margin-bottom:10px;flex-wrap:wrap;}
+#studentRoot .badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:800;}
+#studentRoot .b-id{background:#2e2050;color:var(--gs-gold-lt);}
+#studentRoot .b-grade{background:rgba(140,105,55,.18);color:var(--gs-ink-brown);}
+#studentRoot .b-unit{background:rgba(140,105,55,.1);color:var(--gs-ink-brown-2);}
+#studentRoot .grade-warn{background:rgba(140,105,55,.12);border:1px solid rgba(140,105,55,.3);border-radius:10px;padding:10px 12px;font-size:13px;color:var(--gs-ink-brown-2);font-weight:700;margin-bottom:12px;}
+
+#studentRoot .qimg{margin:10px 0;text-align:center;background:rgba(255,255,255,.35);border:1px solid rgba(140,105,55,.25);border-radius:10px;padding:10px;}
+#studentRoot .qimg svg{width:100%;height:auto;max-width:320px;display:block;margin:0 auto;}
+#studentRoot .qimg.wide svg{max-width:600px;}
+#studentRoot .qimg table.plain{width:100%;max-width:230px;margin:0 auto 10px;border-collapse:collapse;}
+#studentRoot .qimg table.plain th,#studentRoot .qimg table.plain td{border:1px solid rgba(140,105,55,.4);padding:5px 8px;font-size:12px;text-align:center;}
+#studentRoot .qimg table.plain th{background:rgba(140,105,55,.12);}
+#studentRoot .pictogram{font-size:30px;text-align:center;letter-spacing:8px;}
+#studentRoot .dotgrid{font-size:19px;text-align:center;letter-spacing:2px;color:var(--gs-ink-brown-2);line-height:1.6;font-weight:700;}
+#studentRoot .q-text{font-size:16px;font-weight:700;margin:12px 0;line-height:1.6;color:#fff;text-shadow:-1px -1px 0 rgba(20,14,10,.85),1px -1px 0 rgba(20,14,10,.85),-1px 1px 0 rgba(20,14,10,.85),1px 1px 0 rgba(20,14,10,.85),0 2px 6px rgba(0,0,0,.5);}
+#studentRoot .ans-row{display:flex;gap:8px;margin-top:10px;}
+#studentRoot .ans-row .txt-inp{text-transform:none;}
+
+#studentRoot .fb-box{margin-top:14px;padding:14px;border-radius:12px;font-size:15px;font-weight:800;text-align:center;}
+#studentRoot .fb-box img{width:28px;vertical-align:-6px;margin-right:6px;}
+#studentRoot .fb-ok{background-image:linear-gradient(170deg,var(--gs-success-1),var(--gs-success-2));color:#e6ffe9;border:1px solid var(--gs-success-border);}
+#studentRoot .fb-bad{background:rgba(90,20,30,.55);color:#ffd8dd;border:1px solid rgba(255,140,150,.4);}
+#studentRoot .fb-lock{background:rgba(46,32,80,.7);color:var(--gs-gold-lt);border:1px solid rgba(255,205,130,.35);}
+#studentRoot .fb-review{background:rgba(46,32,80,.5);color:var(--gs-lilac-lt);border:1px solid rgba(201,185,232,.35);}
+
+#studentRoot .center-icon{font-size:42px;text-align:center;margin-bottom:6px;}
+
+#studentRoot .scr-hd{display:flex;align-items:center;justify-content:space-between;margin:14px 0 6px;}
+#studentRoot .scr-hd .lbl{font-size:12px;font-weight:800;color:var(--gs-ink-brown-2);}
+#studentRoot .scr-hd button{border:1px solid rgba(140,105,55,.4);background:rgba(255,255,255,.4);border-radius:8px;padding:5px 10px;font-size:11px;font-weight:700;color:var(--gs-ink-brown);cursor:pointer;font-family:'Nanum Gothic',sans-serif;}
+#studentRoot .canvas-wrap{position:relative;height:clamp(260px,46vh,460px);border:1px solid rgba(140,105,55,.4);border-radius:10px;background:#15111f;touch-action:none;overflow:hidden;margin-top:10px;}
+#studentRoot .canvas-wrap canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;}
+
+/* 문제 풀이 화면: 태블릿 가로 사용을 기본으로 하여 문제→정답 입력→풀이 공간을 위에서 아래로 한 줄로 배치 (세로 전환 대응 분기 없음) */
+#studentRoot[data-scene="study"] .wrap{max-width:1040px;}
+#studentRoot[data-scene="study"] .parchment-frame{max-width:960px;}
+
+#studentRoot .finale{text-align:center;padding:40px 16px;position:relative;z-index:1;}
+#studentRoot .finale .em{font-size:64px;}
+#studentRoot .finale h2{font-size:22px;margin:10px 0;color:var(--gs-gold-lt);}
+#studentRoot .finale p{font-size:14px;color:var(--gs-lilac);line-height:1.7;}
+#studentRoot .top-back{font-size:13px;color:var(--gs-gold);font-weight:800;cursor:pointer;margin-bottom:10px;display:inline-block;position:relative;z-index:1;}
+
+#studentRoot .modal-ov{position:fixed;inset:0;background:rgba(5,3,12,.75);z-index:200;display:flex;align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto;}
+#studentRoot .modal-box{background-image:linear-gradient(170deg,var(--gs-parchment-1),var(--gs-parchment-2));border-radius:16px;padding:26px 20px;max-width:340px;width:100%;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.6);color:var(--gs-ink-brown);margin:auto;}
+#studentRoot .modal-icon{width:56px;margin:0 auto 4px;display:block;}
+#studentRoot .modal-box .em{font-size:56px;}
+#studentRoot .modal-box h3{font-size:19px;margin:8px 0;color:var(--gs-ink-brown);}
+#studentRoot .modal-box p{font-size:13px;color:var(--gs-ink-brown-2);line-height:1.6;margin-bottom:16px;text-align:left;}
+
+/* 조/교실 상세 공용 레이아웃 */
+#studentRoot .room-detail-layout{display:flex;gap:32px;flex-wrap:wrap;align-items:flex-start;justify-content:center;position:relative;z-index:1;}
+#studentRoot .room-detail-layout>.parchment-frame{margin:0;}
+#studentRoot .side-panel{flex:0 0 200px;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;}
+#studentRoot .team-icon-img{width:90px;filter:drop-shadow(0 6px 14px rgba(0,0,0,.7));}
+#studentRoot .key-row{display:flex;justify-content:center;align-items:flex-end;gap:12px;flex-wrap:wrap;}
+#studentRoot .key-icon{width:40px;filter:drop-shadow(0 0 14px rgba(255,205,120,.95));}
+#studentRoot .key-icon.off{filter:grayscale(1) brightness(.5);opacity:.55;}
+#studentRoot .note-box{background:rgba(46,32,80,.86);border:1px solid rgba(255,205,130,.35);border-radius:8px;padding:12px 10px;color:var(--gs-gold-lt);font-weight:700;font-size:14px;line-height:1.6;box-shadow:0 6px 18px rgba(0,0,0,.55);}
+#studentRoot .note-box .sub{font-weight:400;color:var(--gs-lilac);font-size:11px;white-space:nowrap;}
+
+#studentRoot .parchment-frame{flex:1 1 380px;max-width:520px;margin:0 auto;background-color:var(--gs-parchment-2);background-image:linear-gradient(180deg,rgba(20,14,32,.15),rgba(20,14,32,.15)),url('assets/background_problem_frame.png');background-size:100% 100%,100% 100%;background-repeat:no-repeat,no-repeat;padding:9% 10% 10%;box-sizing:border-box;}
+#studentRoot .parchment-frame-inner{display:flex;flex-direction:column;align-items:center;text-align:center;}
+#studentRoot .room-photo-lg{width:100%;max-width:360px;aspect-ratio:800/436;object-fit:cover;border-radius:14px;box-shadow:0 8px 20px rgba(0,0,0,.5);margin-bottom:4px;}
+#studentRoot .room-title{font-family:'Nanum Myeongjo',serif;font-size:28px;font-weight:800;color:var(--gs-ink-brown);margin-top:6px;}
+#studentRoot .room-subprog{font-size:15px;color:var(--gs-ink-brown-2);margin-top:2px;}
+
+#studentRoot .mission-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px 10px;margin-top:18px;width:100%;}
+#studentRoot .mission-icon{position:relative;text-align:center;}
+#studentRoot .mission-icon img{width:100%;max-width:90px;}
+#studentRoot .mission-icon.locked img{filter:grayscale(.85) brightness(.62);}
+#studentRoot .mission-icon.next img{filter:drop-shadow(0 0 16px rgba(255,205,120,.95));}
+#studentRoot .mission-icon.solved img{filter:drop-shadow(0 4px 8px rgba(0,0,0,.35));}
+#studentRoot .mission-icon .badge-img{position:absolute;width:30px;right:-2px;top:-6px;}
+#studentRoot .mission-icon.solved .badge-img{right:4px;bottom:-2px;top:auto;width:26px;}
+
+#studentRoot .celebrate-ov{position:fixed;inset:0;z-index:250;display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:24px;background-image:linear-gradient(180deg,rgba(16,10,32,.45),rgba(16,10,32,.85)),url('assets/background_mission_select.png');background-size:cover,cover;background-position:center,center;background-repeat:no-repeat,no-repeat;}
+#studentRoot .celebrate-inner{display:flex;gap:32px;flex-wrap:wrap;align-items:center;justify-content:center;max-width:900px;margin:auto;}
+#studentRoot .curse-title{font-family:'Nanum Myeongjo',serif;font-size:44px;font-weight:800;line-height:1.25;color:#fff4dc;text-shadow:0 0 24px rgba(255,190,90,.65),0 4px 12px rgba(0,0,0,.9);text-align:center;}
+#studentRoot .chest-img{display:block;width:110px;margin:0 auto -14px;position:relative;z-index:1;filter:drop-shadow(0 0 22px rgba(255,205,120,.7));}
+#studentRoot .result-card{background-image:linear-gradient(168deg,var(--gs-parchment-1),var(--gs-parchment-2));border-radius:8px;box-shadow:0 14px 36px rgba(0,0,0,.65);border:2px solid rgba(140,105,55,.5);padding:32px 28px 26px;max-width:420px;color:var(--gs-ink-brown);text-align:center;}
+#studentRoot .result-stats{display:flex;justify-content:center;gap:22px;margin-top:22px;flex-wrap:wrap;}
+#studentRoot .result-stat{text-align:center;}
+#studentRoot .result-stat .label{font-size:13px;color:var(--gs-ink-brown-2);}
+#studentRoot .result-stat .value{font-size:20px;font-weight:800;color:var(--gs-ink-brown);margin-top:4px;}
+
+#studentRoot .admin-acc{margin-top:24px;text-align:center;position:relative;z-index:1;}
+#studentRoot .admin-acc summary{font-size:11px;color:var(--gs-lilac);cursor:pointer;list-style:none;}
+#studentRoot .admin-acc summary::-webkit-details-marker{display:none;}
+#studentRoot .admin-acc-body{margin-top:10px;display:flex;gap:8px;justify-content:center;}
+#studentRoot .confetti-cv{position:fixed;inset:0;pointer-events:none;z-index:300;}
+@media (max-width:700px){
+  #studentRoot .room-grid-3col{grid-template-columns:repeat(2,minmax(0,1fr));}
+  #studentRoot .stage{flex-direction:column;align-items:stretch;}
+  #studentRoot .side-panel{flex:none;}
+  #studentRoot[data-scene="village"]{display:block;}
+  #studentRoot[data-scene="village"] .wrap{display:block;flex:none;}
+  #studentRoot[data-scene="village"] .stage{flex:none;}
+  #studentRoot[data-scene="village"] .side-panel{justify-content:flex-start;}
+  #studentRoot[data-scene="village"] .room-grid-3col{grid-template-rows:none;}
+  #studentRoot[data-scene="village"] .room-card,#studentRoot[data-scene="village"] .final-card{display:block;}
+}
+
+/* ===== 관리자 화면 (.admin-scope 스코프) ===== */
+.admin-scope .hd{background:linear-gradient(135deg,var(--navy),var(--navy-g));color:#fff;padding:16px 20px;}
+.admin-scope .hd h1{font-size:19px;}
+.admin-scope .hd .sub{font-size:11px;opacity:.7;margin-top:2px;}
+.admin-scope .tabs{display:flex;gap:2px;background:rgba(255,255,255,.15);border-radius:8px;padding:2px;margin-top:10px;max-width:560px;flex-wrap:wrap;}
+.admin-scope .empty-msg{color:var(--tx2);font-size:13px;padding:20px;text-align:center;}
+.admin-scope select.team-sel{padding:5px 8px;border-radius:6px;border:1px solid var(--bdr);font-family:inherit;font-size:12px;}
+.admin-scope .help-card{border:2px solid #F59E0B;background:#FFFBEB;}
+.admin-scope .help-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid #FDE68A;}
+.admin-scope .help-row:first-of-type{border-top:none;}
+.admin-scope .help-title{font-weight:900;color:#92400E;margin-bottom:4px;font-size:14px;}
+.admin-scope .modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;display:none;align-items:center;justify-content:center;padding:16px;}
+.admin-scope .modal-ov.show{display:flex;}
+.admin-scope .modal-box{background:#fff;border-radius:16px;padding:20px;max-width:760px;width:100%;max-height:85vh;overflow-y:auto;text-align:left;box-shadow:0 16px 48px rgba(0,0,0,.25);}
+.admin-scope .modal-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;position:sticky;top:0;background:#fff;padding-bottom:8px;}
+.admin-scope .modal-hd h3{font-size:16px;color:var(--navy);}
+.admin-scope .work-item{margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--bdr);}
+.admin-scope .work-item img{max-width:100%;border:1px solid var(--bdr);border-radius:8px;margin-top:6px;background:#fafbfc;}
+.admin-scope .tab{flex:1;padding:8px 6px;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:700;background:transparent;color:rgba(255,255,255,.7);font-family:inherit;white-space:nowrap;}
+.admin-scope .tab.on{background:#fff;color:var(--navy);}
+.admin-scope .wrap{max-width:1000px;margin:0 auto;padding:18px;}
+.admin-scope .card{background:var(--card);border-radius:10px;box-shadow:var(--sh);padding:16px;margin-bottom:16px;}
+.admin-scope table{width:100%;border-collapse:collapse;font-size:13px;}
+.admin-scope th,.admin-scope td{border:1px solid var(--bdr);padding:8px 6px;text-align:center;}
+.admin-scope th{background:#F0F3F7;font-size:11px;}
+.admin-scope .prog-cell{font-weight:800;}
+.admin-scope .prog-full{color:var(--green);background:#EAFBF1;}
+.admin-scope .prog-zero{color:#B9C2CC;}
+.admin-scope .keycount{font-size:18px;font-weight:900;color:#D4A017;}
+.admin-scope .btn{border:none;border-radius:8px;cursor:pointer;font-family:inherit;font-weight:700;padding:9px 16px;font-size:13px;}
+.admin-scope .btn-danger{background:var(--red);color:#fff;}
+.admin-scope .btn-primary{background:var(--sky);color:#fff;}
+.admin-scope .btn-sub{background:#F0F3F7;color:var(--navy);}
+.admin-scope .reset-mini{margin-top:4px;border:1px solid var(--bdr);background:#fff;color:var(--tx2);border-radius:6px;cursor:pointer;font-size:12px;padding:2px 8px;}
+.admin-scope .reset-mini:hover{background:#FDEEEF;color:var(--red);border-color:#F5C6CB;}
+.admin-scope .actions{display:flex;gap:8px;justify-content:flex-end;margin-bottom:10px;}
+.admin-scope .room-sec{page-break-inside:avoid;margin-bottom:22px;}
+.admin-scope .room-sec h2{font-size:15px;background:var(--navy);color:#fff;padding:6px 10px;border-radius:6px;margin-bottom:10px;}
+.admin-scope .qr-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.admin-scope .qr-card{border:1px solid var(--bdr);border-radius:8px;padding:8px;text-align:center;page-break-inside:avoid;background:#fff;}
+.admin-scope .qr-card canvas{width:100%;height:auto;max-width:120px;}
+.admin-scope .qr-id{font-weight:900;font-size:12px;margin-top:4px;}
+.admin-scope .qr-meta{font-size:10px;color:var(--tx2);}
+.admin-scope .qedit{border-top:1px solid var(--bdr);padding:10px 0;}
+.admin-scope .qedit textarea{width:100%;min-height:52px;padding:6px;border:1px solid var(--bdr);border-radius:6px;font-size:13px;font-family:inherit;}
+.admin-scope .qedit input[type=text],.admin-scope .qedit input:not([type]){padding:5px 8px;border:1px solid var(--bdr);border-radius:6px;font-size:12px;font-family:inherit;}
+.admin-scope .guide-step{background:var(--card);border-radius:10px;box-shadow:var(--sh);padding:16px 16px 16px 54px;margin-bottom:14px;position:relative;}
+.admin-scope .guide-step-num{position:absolute;left:14px;top:16px;width:28px;height:28px;border-radius:50%;background:var(--navy);color:#fff;font-weight:900;font-size:14px;display:flex;align-items:center;justify-content:center;}
+.admin-scope .guide-step h3{font-size:15px;margin-bottom:6px;color:var(--navy);}
+.admin-scope .guide-step p{font-size:13px;line-height:1.65;color:var(--tx2);margin-bottom:6px;}
+.admin-scope .guide-step p:last-child{margin-bottom:0;}
+.admin-scope .guide-step ul{margin:4px 0 6px 18px;font-size:13px;line-height:1.65;color:var(--tx2);}
+.admin-scope .guide-note{background:#EFF6FF;border:1px solid #BFDBFE;color:#1E40AF;border-radius:8px;padding:8px 12px;font-size:12px;margin-top:8px;}
+.admin-scope .guide-warn{background:#FEF2F2;border:1px solid #FECACA;color:#B91C1C;border-radius:8px;padding:8px 12px;font-size:12px;margin-top:8px;}
+.admin-scope .guide-link-box{display:flex;gap:8px;align-items:center;background:#F0F3F7;border-radius:8px;padding:10px 12px;margin-top:8px;flex-wrap:wrap;}
+.admin-scope .guide-link-box code{font-size:13px;font-weight:700;color:var(--navy);word-break:break-all;}
+.admin-scope .guide-faq details{border-top:1px solid var(--bdr);padding:10px 0;}
+.admin-scope .guide-faq details:first-child{border-top:none;}
+.admin-scope .guide-faq summary{cursor:pointer;font-weight:700;font-size:13px;color:var(--navy);}
+.admin-scope .guide-faq p{font-size:12px;color:var(--tx2);margin-top:6px;line-height:1.65;}
+.admin-scope .guide-shot{margin-top:10px;}
+.admin-scope .guide-shot img{max-width:100%;border:1px solid var(--bdr);border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.1);display:block;}
+.admin-scope .guide-shot-cap{font-size:11px;color:var(--tx2);margin-top:5px;text-align:center;}
+.admin-scope .guide-shot-row{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;}
+.admin-scope .guide-shot-row .guide-shot{flex:1;min-width:130px;max-width:200px;}
+@media print{
+  .admin-scope .hd,.admin-scope .actions,.admin-scope .tabs{display:none!important;}
+  .admin-scope .wrap{padding:0;max-width:none;}
+  .admin-scope .card{box-shadow:none;border:none;padding:0;}
+  .admin-scope .qr-grid{grid-template-columns:repeat(4,1fr);}
+  .admin-scope .qr-id,.admin-scope .no-print{display:none!important;}
+}
+
+/* ===== 미션 방탈출 전용 ===== */
+#studentRoot .room-card .room-mission{font-size:11.5px;color:#fff4dc;margin-top:3px;line-height:1.35;word-break:keep-all;text-shadow:0 1px 4px rgba(0,0,0,.9);}
+#studentRoot .room-card .room-name{font-size:16px;text-shadow:0 2px 6px rgba(0,0,0,.9);}
+#studentRoot[data-scene="village"] .room-card{min-height:150px;}
+#studentRoot[data-scene="study"] .parchment-frame{max-width:720px;}
+#studentRoot .mission-badge{display:inline-block;background:#2e2050;color:var(--gs-gold-lt);border-radius:20px;padding:4px 12px;font-size:12px;font-weight:800;margin-top:10px;}
+#studentRoot .mission-title{font-family:'Nanum Myeongjo',serif;font-size:24px;font-weight:800;color:var(--gs-ink-brown);margin-top:8px;line-height:1.35;word-break:keep-all;}
+#studentRoot .mission-goal{width:100%;margin-top:14px;background:rgba(46,32,80,.88);color:var(--gs-gold-lt);border:2px solid rgba(255,205,130,.55);border-radius:12px;padding:14px;font-size:17px;font-weight:800;line-height:1.55;word-break:keep-all;}
+#studentRoot .mission-goal .lbl{display:block;font-size:12px;color:var(--gs-lilac);margin-bottom:4px;letter-spacing:.06em;}
+#studentRoot .mission-desc{width:100%;text-align:left;margin-top:12px;background:rgba(255,250,235,.55);border:1px solid rgba(140,105,55,.3);border-radius:12px;padding:12px 14px;font-size:14.5px;line-height:1.75;color:var(--gs-ink-brown);word-break:keep-all;white-space:pre-line;}
+#studentRoot .yt-wrap{width:100%;margin-top:12px;position:relative;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#000;box-shadow:0 8px 20px rgba(0,0,0,.45);}
+#studentRoot .yt-wrap iframe{position:absolute;inset:0;width:100%;height:100%;border:0;}
+#studentRoot .yt-link{display:inline-block;margin-top:8px;font-size:13px;font-weight:800;color:#8a1c1c;text-decoration:underline;}
+#studentRoot .photo-box{width:100%;margin-top:12px;background:rgba(255,250,235,.55);border:1px dashed rgba(140,105,55,.55);border-radius:12px;padding:12px;}
+#studentRoot .photo-box img{max-width:100%;max-height:320px;border-radius:10px;margin-top:8px;box-shadow:0 4px 12px rgba(0,0,0,.35);}
+#studentRoot .wait-box{width:100%;margin-top:14px;padding:14px;border-radius:12px;font-size:14.5px;font-weight:800;text-align:center;background:rgba(46,32,80,.7);color:var(--gs-gold-lt);border:1px solid rgba(255,205,130,.35);line-height:1.6;word-break:keep-all;}
+.admin-scope .tch-room-pick{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;}
+.admin-scope .tch-room-btn{border:2px solid var(--bdr);background:#fff;border-radius:12px;padding:14px 8px;font-family:inherit;font-size:15px;font-weight:800;color:var(--navy);cursor:pointer;}
+.admin-scope .tch-room-btn.on{border-color:var(--sky);background:#EAF2FB;}
+.admin-scope .tch-team{display:flex;align-items:center;gap:12px;padding:12px 4px;border-top:1px solid var(--bdr);flex-wrap:wrap;}
+.admin-scope .tch-team:first-of-type{border-top:none;}
+.admin-scope .tch-team .nm{font-size:18px;font-weight:900;min-width:52px;}
+.admin-scope .tch-team .mem{flex:1;min-width:140px;font-size:12px;color:var(--tx2);}
+.admin-scope .btn-ok{background:var(--green);color:#fff;font-size:16px;padding:12px 20px;}
+.admin-scope .here-tag{display:inline-block;background:#FEF3C7;color:#92400E;border-radius:12px;padding:2px 8px;font-size:11px;font-weight:800;margin-left:6px;}
+.admin-scope .cell-ok{background:#EAFBF1;color:var(--green);font-weight:900;}
+.admin-scope .mini{padding:4px 8px;font-size:11px;}
+.admin-scope .medit{border-top:1px solid var(--bdr);padding:12px 0;}
+.admin-scope .medit label{display:block;font-size:11px;font-weight:700;color:var(--tx2);margin:6px 0 2px;}
+.admin-scope .medit input,.admin-scope .medit textarea{width:100%;padding:7px 8px;border:1px solid var(--bdr);border-radius:6px;font-size:13px;font-family:inherit;}
+.admin-scope .medit textarea{min-height:110px;}
+@media (max-width:700px){.admin-scope .tch-room-pick{grid-template-columns:repeat(2,minmax(0,1fr));}}
+</style>
+</head>
+<body>
+<div id="studentRoot">
+  <div class="hd">
+    <div class="hd-l">
+      <div class="hd-title">🔑 미션 방탈출</div>
+      <div class="hd-team" id="hdTeam">조 선택 전</div>
+    </div>
+    <div class="sync-ind"><span class="sync-dot sync-off" id="syncDot"></span><span id="syncTxt">연결 중</span></div>
+  </div>
+  <div class="wrap" id="app"></div>
+</div>
+
+<div id="adminRoot" class="admin-scope" style="display:none">
+  <div class="hd">
+    <h1>🔑 미션 방탈출 관리자 페이지</h1>
+    <div class="sub">실시간 진행 현황 · 교실별 미션 성공 처리</div>
+    <div class="tabs">
+      <button class="tab on" id="tabTeacher" onclick="showTab('teacher')">✅ 교실 선생님</button>
+      <button class="tab" id="tabDash" onclick="showTab('dash')">📊 대시보드</button>
+      <button class="tab" id="tabRoster" onclick="showTab('roster')">🧑‍🤝‍🧑 학생 배정</button>
+      <button class="tab" id="tabMissions" onclick="showTab('missions')">📝 미션 관리</button>
+      <button class="tab" onclick="exitAdminMode()">← 학생 화면으로</button>
+    </div>
+  </div>
+  <div class="wrap">
+    <div id="globalErr" style="display:none;color:#E0465A;background:#FDEEEF;border:1px solid #F5C6CB;border-radius:10px;padding:12px;margin-bottom:14px;font-size:13px;"></div>
+    <div id="viewTeacher"></div>
+    <div id="viewDash" style="display:none"></div>
+    <div id="viewRoster" style="display:none"></div>
+    <div id="viewMissions" style="display:none"></div>
+  </div>
+  <div class="modal-ov" id="workModalOv">
+    <div class="modal-box">
+      <div class="modal-hd"><h3 id="workModalTitle"></h3><button class="btn btn-sub" onclick="closeWorkModal()">닫기</button></div>
+      <div id="workModalBody"></div>
+    </div>
+  </div>
+</div>
+
+<div id="guideRoot" class="admin-scope" style="display:none">
+  <div class="hd">
+    <h1>📖 미션 방탈출 사용설명서</h1>
+    <div class="sub">비밀번호 없이 누구나 볼 수 있어요</div>
+    <div class="tabs">
+      <button class="tab" onclick="exitPublicGuide()">← 뒤로가기</button>
+    </div>
+  </div>
+  <div class="wrap">
+    <div id="viewGuidePublic"></div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="scripts/roster-utils.js"></script>
+<script>
+window.addEventListener("error",function(e){
+  const el=document.getElementById("globalErr")||document.getElementById("app");
+  if(el)el.innerHTML='<div class="card" style="color:#E0465A"><b>화면 오류가 발생했어요.</b><br>'+e.message+'<br><br>학교 와이파이가 구글 서버(Firebase) 접속을 막고 있을 수 있어요. 새로고침해보거나 다른 네트워크로 접속해보세요.</div>';
+});
+firebase.initializeApp({apiKey:"AIzaSyAKbtiQ1UutXkGI2ozyTNDO3N20NQ9vjDE",authDomain:"jump-rope-43833.firebaseapp.com",databaseURL:"https://jump-rope-43833-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"jump-rope-43833",storageBucket:"jump-rope-43833.firebasestorage.app",messagingSenderId:"870652268913",appId:"1:870652268913:web:6b45cabb7e317827b1a6d0"});
+const db=firebase.database();
+
+/* ===================== 미션(교실) 데이터 ===================== */
+/* 문제 풀이형 방탈출(escape 저장소)과 같은 Firebase를 쓰지만, 데이터는 escape_data/mission_app
+   아래에 따로 저장해서 기존 방탈출의 명단·진행 기록과 절대 섞이지 않게 한다.
+   6개 교실의 협동 미션을 모두 성공해야 방탈출 완료. 성공 처리는 각 교실 선생님만 할 수 있다. */
+const MISSION_TEMPLATES=[
+ {id:"M1",emoji:"🥤",name:"1학년 교실",photo:"rooms/grade1_classroom.png",
+  title:"3-6-3 컵 쌓기 (더블 스택스)",
+  goal:"2인 1조로 3-6-3 더블 스택스 쌓기를 1분 안에 성공하기!",
+  desc:"① 두 친구가 나란히 서서, 한 사람은 오른손만 · 다른 사람은 왼손만 써요. (두 사람이 한 몸처럼!)\n② 컵 3개 - 6개 - 3개를 차례로 쌓아 피라미드 3개를 만들어요.\n③ 다 쌓았으면 다시 3 - 6 - 3 묶음으로 차곡차곡 내려놓아요.\n④ 선생님이 시간을 재요. 1분 안에 성공하면 통과!\n💡 미션을 시작하기 전에 아래 영상을 보고 연습해보세요.",
+  yt:"https://youtu.be/9WUwd1Teli0?t=562",photoProof:false},
+ {id:"M2",emoji:"🪢",name:"VR실",photo:"classroom_vr_photo.png",
+  title:"단체 줄넘기",
+  goal:"조원 모두 함께 단체 줄넘기 20개 성공하기!",
+  desc:"① 두 사람이 긴 줄을 돌리고, 나머지 친구들은 줄 안에서 다 함께 뛰어요.\n② 중간에 줄에 걸려도 괜찮아요! 걸린 것까지 포함해서 모두 20개를 채우면 성공이에요.\n③ 다 같이 큰 소리로 숫자를 세어보세요.\n④ 20개를 채우면 선생님께 확인을 받아요.",
+  yt:"",photoProof:false},
+ {id:"M3",emoji:"📚",name:"도서관",photo:"classroom_library_photo.png",
+  title:"귀신 책 · 그림책 찾기",
+  goal:"귀신 이야기 책 또는 그림이 있는 그림책 3권을 찾아 인증샷 찍기!",
+  desc:"① 도서관 책장에서 귀신(유령·도깨비) 이야기 책이나 그림이 있는 그림책을 찾아요.\n② 3권을 모두 찾았으면 조원 모두 책과 함께 사진을 찍어요.\n③ 아래 '📸 인증샷 찍기' 버튼으로 사진을 올리고 선생님께 보여드리세요.\n④ 찾은 책은 꼭 제자리에 다시 꽂아주세요!",
+  yt:"",photoProof:true},
+ {id:"M4",emoji:"⭕",name:"컴퓨터실",photo:"classroom_computer_photo.png",
+  title:"훌라후프 통과하기",
+  goal:"굴러가는 훌라후프를 친구가 통과하기 — 서로 다른 3명 성공!",
+  desc:"① 한 친구가 훌라후프를 바닥에 굴려요.\n② 다른 친구가 굴러가는 훌라후프 안으로 몸을 통과시켜요.\n③ 통과하는 사람은 매번 달라야 해요. 서로 다른 친구 3명이 통과하면 성공!\n④ 훌라후프가 쓰러지거나 몸에 걸리면 다시 도전해요.",
+  yt:"",photoProof:false},
+ {id:"M5",emoji:"🥄",name:"영어체험실",photo:"classroom_english_photo.png",
+  title:"숟가락 탁구공 릴레이",
+  goal:"숟가락으로 탁구공을 떨어뜨리지 않고 팀원끼리 옮기기!",
+  desc:"① 조원 모두 숟가락을 하나씩 들고 한 줄로 서요.\n② 첫 번째 친구의 숟가락에 탁구공을 올려요.\n③ 손으로 공을 만지지 않고, 숟가락에서 숟가락으로 다음 친구에게 넘겨요.\n④ 마지막 친구까지 떨어뜨리지 않고 옮기면 성공! 떨어지면 처음부터 다시 해요.",
+  yt:"",photoProof:false},
+ {id:"M6",emoji:"🔬",name:"과학실",photo:"rooms/science_room.png",
+  title:"탁구공 컵 넣기",
+  goal:"컵 12개에 탁구공 5개 넣기!",
+  desc:"① 책상 위에 놓인 컵 12개를 확인해요.\n② 선생님이 정한 선 뒤에서 탁구공을 던지거나 튕겨서 컵 안에 넣어요.\n③ 탁구공 5개가 컵 안에 들어가면 성공!\n💡 던지는 거리·튕기기 같은 규칙은 선생님 안내를 꼭 따라요.",
+  yt:"",photoProof:false},
+];
+/* 관리자가 각 교실의 사진·이름을 바꿀 수 있는 갤러리 — "미션 관리" 탭의 교실 꾸미기에서 선택 */
+const ROOM_PHOTO_GALLERY=[
+ {file:"rooms/grade1_classroom.png",label:"1학년 교실",emoji:"🥤"},
+ {file:"classroom_vr_photo.png",label:"VR실",emoji:"🥽"},
+ {file:"classroom_library_photo.png",label:"도서관",emoji:"📚"},
+ {file:"classroom_computer_photo.png",label:"컴퓨터실",emoji:"💻"},
+ {file:"classroom_english_photo.png",label:"영어체험실",emoji:"🌍"},
+ {file:"rooms/science_room.png",label:"과학실",emoji:"🔬"},
+ {file:"classroom_gym_photo.png",label:"강당",emoji:"🏛️"},
+ {file:"rooms/library_room.png",label:"도서실",emoji:"📖"},
+ {file:"rooms/computer_room.png",label:"컴퓨터실2",emoji:"💻"},
+ {file:"rooms/english_room.png",label:"영어실",emoji:"🌍"},
+ {file:"rooms/gym_room.png",label:"체육관",emoji:"🏆"},
+ {file:"rooms/art_room.png",label:"미술실",emoji:"🎨"},
+ {file:"rooms/music_room.png",label:"음악실",emoji:"🎵"},
+ {file:"rooms/math_room.png",label:"수학실",emoji:"🔢"},
+ {file:"rooms/health_room.png",label:"보건실",emoji:"➕"},
+ {file:"rooms/practical_arts_room.png",label:"실과실",emoji:"🧰"},
+ {file:"rooms/lounge_room.png",label:"휴게실",emoji:"☕"},
+ {file:"rooms/afterschool_room.png",label:"방과후 교실",emoji:"🌆"},
+ {file:"rooms/grade2_classroom.png",label:"2학년 교실",emoji:"2️⃣"},
+ {file:"rooms/grade3_classroom.png",label:"3학년 교실",emoji:"3️⃣"},
+ {file:"rooms/grade4_classroom.png",label:"4학년 교실",emoji:"4️⃣"},
+ {file:"rooms/grade5_classroom.png",label:"5학년 교실",emoji:"5️⃣"},
+ {file:"rooms/grade6_classroom.png",label:"6학년 교실",emoji:"🎓"},
+];
+let roomCustom={};    // {M1:{name,emoji,photo}} — 교실 꾸미기
+let missionCustom={}; // {M1:{title,goal,desc,yt}} — 미션 관리
+function roomOf(rid){
+  const t=MISSION_TEMPLATES.find(x=>x.id===rid);
+  if(!t)return null;
+  return Object.assign({},t,roomCustom[rid]||{},missionCustom[rid]||{});
+}
+function allRooms(){return MISSION_TEMPLATES.map(t=>roomOf(t.id));}
+const MISSION_COUNT=MISSION_TEMPLATES.length;
+
+function teamIconSrc(n){const i=((Number(n)-1)%5+5)%5+1;return "assets/team_"+i+".png";}
+function setScene(name){
+  const root=document.getElementById("studentRoot");
+  if(root)root.setAttribute("data-scene",name||"");
+}
+function escapeHtml(s){return (s||"").toString().replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));}
+/* 유튜브 주소(youtu.be/ID?t=562, watch?v=ID&t=9m22s 등)에서 영상 ID와 시작 초를 뽑아 embed 주소로 바꾼다 */
+function youtubeEmbed(url){
+  if(!url)return null;
+  const m=url.match(/(?:youtu\.be\/|v=|embed\/|shorts\/)([A-Za-z0-9_-]{11})/);
+  if(!m)return null;
+  let start=0;
+  const t=url.match(/[?&](?:t|start)=([0-9hms]+)/);
+  if(t){
+    const v=t[1];
+    if(/^\d+$/.test(v))start=Number(v);
+    else{const h=v.match(/(\d+)h/),mi=v.match(/(\d+)m/),s=v.match(/(\d+)s/);start=(h?Number(h[1])*3600:0)+(mi?Number(mi[1])*60:0)+(s?Number(s[1]):0);}
+  }
+  return "https://www.youtube.com/embed/"+m[1]+"?rel=0&playsinline=1"+(start?"&start="+start:"");
+}
+
+/* ?school=코드 로 학교별 저장소를 분리한다. 코드가 없으면 기본 저장소를 쓴다. */
+const ESC_BASE="escape_data/mission_app";
+const urlParams=new URLSearchParams(location.search);
+const SCHOOL_ID=(urlParams.get("school")||"").trim().replace(/[^A-Za-z0-9_-]/g,"").slice(0,40);
+const ESC_ROOT=ESC_BASE+(SCHOOL_ID?("/schools/"+SCHOOL_ID):"");
+const dbRoot=db.ref(ESC_ROOT);
+const teacherParam=(urlParams.get("teacher")||"").toUpperCase();
+
+/* ===================== 상태 ===================== */
+let appMode="student";
+let team=localStorage.getItem("mission_team_"+SCHOOL_ID)||"";
+let teamCount=0;
+let rosterAll={};
+let missions={};      // 우리 조 성공 기록 {M1:{ok:true,ts}}
+let photos={};        // 우리 조 인증샷 {M3:{data,ts}}
+let occupy={};        // 교실 사용 현황 {M1:{team:"3",ts}} — 모든 태블릿이 실시간 공유
+let prevMissions=null;// 성공 알림을 띄우기 위한 직전 상태(첫 수신 때는 null)
+let dbRef=null;
+let view="teamPick",currentRoomDetailId=null,pendingCelebration=false;
+let SCHOOL_ADMIN_PW=null;
+let adminListenerAttached=false;
+let currentTab="teacher";
+let lastAllData={};
+let parsedRosterPreview=null;
+let teacherRoom=localStorage.getItem("mission_teacher_room")||"";
+if(MISSION_TEMPLATES.some(t=>t.id===teacherParam))teacherRoom=teacherParam;
+
+const app=document.getElementById("app");
+
+/* ===================== 관리자 로그인 · 학교 주소 ===================== */
+function generateAdminPw(){
+  const chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let pw="";
+  for(let i=0;i<6;i++)pw+=chars[Math.floor(Math.random()*chars.length)];
+  return pw;
+}
+function connectAdminPw(){
+  db.ref(ESC_ROOT+"/meta/adminPw").on("value",snap=>{
+    SCHOOL_ADMIN_PW=snap.val()||null;
+    const gr=document.getElementById("guideRoot");
+    if(gr&&gr.style.display!=="none")renderGuideTab("viewGuidePublic");
+  });
+}
+function tryAdminLogin(){
+  const el=document.getElementById("adminPw");
+  const v=el?el.value:"";
+  if(v===(SCHOOL_ADMIN_PW||"escape2026")){
+    sessionStorage.setItem("mission_admin_ok","1");
+    enterAdminMode();
+  }else{
+    alert("비밀번호가 올바르지 않아요.");
+  }
+}
+function enterAdminMode(){
+  appMode="admin";
+  document.getElementById("studentRoot").style.display="none";
+  document.getElementById("guideRoot").style.display="none";
+  document.getElementById("adminRoot").style.display="";
+  if(!adminListenerAttached){
+    adminListenerAttached=true;
+    dbRoot.on("value",
+      snap=>{lastAllData=snap.val()||{};renderAdminViews();},
+      err=>{document.getElementById("viewDash").innerHTML='<div class="card" style="color:var(--red)"><b>데이터를 불러오지 못했어요.</b><br>오류: '+err.message+'</div>';}
+    );
+  }
+  renderRosterTab();
+  showTab(currentTab);
+}
+function exitAdminMode(){
+  sessionStorage.removeItem("mission_admin_ok");
+  appMode="student";
+  document.getElementById("adminRoot").style.display="none";
+  document.getElementById("studentRoot").style.display="";
+  rerenderStudent();
+}
+function showTab(t){
+  currentTab=t;
+  ["teacher","dash","roster","missions"].forEach(k=>{
+    const cap=k.charAt(0).toUpperCase()+k.slice(1);
+    document.getElementById("tab"+cap).className="tab"+(t===k?" on":"");
+    document.getElementById("view"+cap).style.display=t===k?"":"none";
+  });
+  renderAdminViews();
+}
+function renderAdminViews(){
+  if(appMode!=="admin")return;
+  if(currentTab==="teacher")renderTeacherTab();
+  if(currentTab==="dash")renderDash();
+  if(currentTab==="missions")renderMissionsTab();
+}
+function createSchoolAndGo(code){
+  sessionStorage.setItem("mission_want_public_guide","1");
+  const go=()=>{location.href=location.origin+location.pathname+"?school="+encodeURIComponent(code);};
+  db.ref(ESC_BASE+"/schools/"+code+"/meta/adminPw").transaction(cur=>cur||generateAdminPw()).then(go).catch(go);
+}
+function goToMySchoolCode(){
+  const el=document.getElementById("newSchoolCodeInput");
+  const code=(el&&el.value||"").trim().replace(/[^A-Za-z0-9_-]/g,"").slice(0,40);
+  if(!code){alert("코드를 입력해주세요. 영문·숫자로, 다른 학교와 안 겹칠 만한 이름이면 돼요.");return;}
+  createSchoolAndGo(code);
+}
+function goToRandomSchoolCode(){createSchoolAndGo(Math.random().toString(36).slice(2,8));}
+function copyText(txt,okMsg){
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(()=>alert(okMsg)).catch(()=>alert("복사에 실패했어요. 직접 선택해서 복사해주세요."));
+  }else{
+    alert("이 브라우저에서는 자동 복사가 안 돼요. 직접 선택해서 복사해주세요.");
+  }
+}
+function setCustomAdminPw(){
+  if(!SCHOOL_ID){alert("먼저 1단계에서 나만의 주소를 만들어주세요.");return;}
+  const el=document.getElementById("customPwInput");
+  const pw=(el&&el.value||"").trim();
+  if(pw.length<4){alert("비밀번호는 4자 이상으로 입력해주세요.");return;}
+  if(!confirm("비밀번호를 입력하신 값으로 바꿀까요? 지금 쓰고 있는 비밀번호는 더 이상 사용할 수 없어요."))return;
+  db.ref(ESC_ROOT+"/meta/adminPw").set(pw).then(()=>{alert("새 비밀번호로 바뀌었어요.");if(el)el.value="";}).catch(e=>alert("저장하지 못했어요: "+e.message));
+}
+function showPublicGuide(){
+  document.getElementById("studentRoot").style.display="none";
+  document.getElementById("adminRoot").style.display="none";
+  document.getElementById("guideRoot").style.display="";
+  renderGuideTab("viewGuidePublic");
+}
+function exitPublicGuide(){
+  document.getElementById("guideRoot").style.display="none";
+  if(sessionStorage.getItem("mission_admin_ok")==="1"){enterAdminMode();}
+  else{document.getElementById("studentRoot").style.display="";rerenderStudent();}
+}
+function baseLink(){return location.origin+location.pathname+(SCHOOL_ID?("?school="+SCHOOL_ID):"");}
+function teacherLink(rid){return baseLink()+(SCHOOL_ID?"&":"?")+"teacher="+rid;}
+function guideStep(n,title,lines,mediaHtml){
+  let h='<div class="guide-step"><div class="guide-step-num">'+n+'</div><h3>'+escapeHtml(title)+'</h3><ul>';
+  lines.forEach(l=>{h+='<li>'+l+'</li>';});
+  h+='</ul>'+(mediaHtml||'')+'</div>';
+  return h;
+}
+function renderGuideTab(targetId){
+  const link=baseLink();
+  let h='<div class="card"><h3 style="margin-bottom:8px;">📖 사용설명서</h3><p style="font-size:13px;color:var(--tx2);line-height:1.65;">6개 교실(1학년 교실 · VR실 · 도서관 · 컴퓨터실 · 영어체험실 · 과학실)을 돌며 조별 협동 미션을 해결하는 방탈출이에요. 각 교실 선생님이 <b>미션 성공</b>을 눌러주면 그 교실의 열쇠를 얻고, 6개 열쇠를 모두 모으면 방탈출 성공이에요.</p></div>';
+  let s1;
+  if(SCHOOL_ID){
+    s1='<div class="guide-link-box"><span style="font-size:12px;color:var(--tx2);">학생(조장 태블릿) 주소</span><code id="guideLinkTxt">'+escapeHtml(link)+'</code><button class="btn btn-sub" style="padding:5px 10px;font-size:11px" onclick="copyText(document.getElementById(\'guideLinkTxt\').textContent,\'주소를 복사했어요.\')">📋 복사</button></div>';
+  }else{
+    s1='<div class="guide-warn">⚠️ 지금은 학교 코드가 없는 기본 주소예요. 다른 선생님과 자료가 섞이지 않도록 나만의 주소를 만들어 쓰는 것을 추천해요.</div>'
+      +'<div class="guide-link-box"><span style="font-size:12px;color:var(--tx2);">나만의 코드</span><input type="text" id="newSchoolCodeInput" placeholder="예: madong2026" style="flex:1;min-width:140px;padding:6px 8px;font-size:13px;border:1px solid var(--bdr);border-radius:6px;"><button class="btn btn-primary" style="padding:6px 12px;font-size:12px" onclick="goToMySchoolCode()">✅ 내 주소 만들기</button></div>'
+      +'<div style="margin-top:8px;font-size:12px;color:var(--tx2);">어려우시면 <button class="btn btn-sub" style="padding:4px 10px;font-size:11px" onclick="goToRandomSchoolCode()">🎲 자동으로 만들기</button></div>';
+  }
+  h+=guideStep(1,"주소 준비하기",["학생용 주소 하나로 조장 태블릿과 선생님 휴대폰 모두 접속해요."],s1);
+  let s2='<div class="guide-link-box"><span style="font-size:12px;color:var(--tx2);">관리자 비밀번호</span><code>'+escapeHtml(SCHOOL_ADMIN_PW||"escape2026")+'</code></div>';
+  if(SCHOOL_ID)s2+='<div class="guide-link-box" style="margin-top:8px;"><span style="font-size:12px;color:var(--tx2);">비밀번호 바꾸기</span><input type="text" id="customPwInput" placeholder="새 비밀번호 (4자 이상)" style="flex:1;min-width:140px;padding:6px 8px;font-size:13px;border:1px solid var(--bdr);border-radius:6px;"><button class="btn btn-primary" style="padding:6px 12px;font-size:12px" onclick="setCustomAdminPw()">바꾸기</button></div>';
+  h+=guideStep(2,"관리자 비밀번호",["조 선택 화면 맨 아래 <b>⚙️ 관리자 모드</b>에 이 비밀번호를 넣으면 관리자 페이지로 들어가요.","각 교실을 맡은 선생님들께도 이 비밀번호를 알려주세요. (학생에게는 알려주지 마세요)"],s2);
+  h+=guideStep(3,"조 개수 정하기 (🧑‍🤝‍🧑 학생 배정 탭)",[
+    "기본은 <b>5개 조</b>예요. 조 개수만 정하면 명단 없이도 바로 쓸 수 있어요. (학생들이 자기 조를 알고 있으면 충분해요)",
+    "(선택) 조 화면에 이름까지 보여주고 싶다면 구글시트 링크나 엑셀을 올려요. 시트 공유 설정은 <b>링크가 있는 모든 사용자 - 뷰어</b>여야 해요.",
+    "첫 줄(제목 줄)에 <b>조</b>, <b>이름</b> 칸이 있으면 시트에 적힌 조 그대로 편성돼요. (학년·반 칸은 있어도 되고 없어도 돼요)",
+    "조 칸이 없으면 <b>학년, 이름</b> 형식으로 읽고, 입력한 조 개수에 맞춰 자동으로 고르게 나눠줘요."
+  ]);
+  h+=guideStep(4,"조장 태블릿 준비",[
+    "조장마다 태블릿 하나씩 위 주소로 접속해서 <b>우리 조</b>를 눌러두면 끝이에요.",
+    "태블릿 화면에는 6개 교실이 <b>🟢 비어 있음 / 🔴 사용 중(몇 조) / ✅ 우리 조 성공</b>으로 실시간 표시돼요.",
+    "교실에 도착하면 그 교실을 눌러 <b>🚪 미션 시작</b>을 누르게 해주세요. 그 순간 다른 조 태블릿에는 그 교실이 사용 중으로 바뀌어요."
+  ]);
+  let links='<div style="display:flex;flex-direction:column;gap:6px;margin-top:8px;">';
+  allRooms().forEach(r=>{
+    const l=teacherLink(r.id);
+    links+='<div class="guide-link-box" style="margin-top:0"><span style="font-size:12px;min-width:90px;">'+r.emoji+' '+escapeHtml(r.name)+'</span><code style="font-size:11px">'+escapeHtml(l)+'</code><button class="btn btn-sub" style="padding:4px 8px;font-size:11px" onclick="copyText(\''+l+'\',\'주소를 복사했어요.\')">📋</button></div>';
+  });
+  links+='</div>';
+  h+=guideStep(5,"교실 선생님: 미션 성공 누르기 (✅ 교실 선생님 탭)",[
+    "각 교실 선생님은 아래 <b>교실별 주소</b>로 휴대폰/태블릿에서 접속 → 관리자 비밀번호 입력 → 바로 그 교실 화면이 열려요.",
+    "지금 교실에서 미션 중인 조가 맨 위에 크게 보여요. 성공하면 <b>✅ N조 미션 성공</b>을 눌러주세요.",
+    "누르는 즉시 그 조 태블릿에 성공 알림과 열쇠가 표시되고, 교실은 <b>비어 있음</b>으로 바뀌어 다른 조 태블릿에서도 바로 들어올 수 있어요.",
+    "잘못 눌렀다면 아래 조 목록에서 <b>성공 취소</b>를 누르면 돼요."
+  ],links);
+  h+=guideStep(6,"미션 내용 바꾸기 (📝 미션 관리 탭)",["미션 제목·목표·설명·유튜브 연습 영상 주소를 고칠 수 있어요. 저장하면 학생 태블릿에 바로 반영돼요."]);
+  document.getElementById(targetId||"viewGuidePublic").innerHTML=h;
+}
+
+/* ===================== 공통 계산 ===================== */
+function teamMembers(n){
+  return Object.values(rosterAll).filter(s=>s&&String(s.teamId)===String(n)).sort((a,b)=>(b.grade||0)-(a.grade||0)||(a.name||"").localeCompare(b.name||"","ko"));
+}
+function memberText(n){
+  const m=teamMembers(n);
+  return m.map(s=>escapeHtml(s.name)+(s.grade?"("+s.grade+")":"")).join(" · ");
+}
+function teamMissionsFromAll(n){return ((lastAllData["team"+n]||{}).missions)||{};}
+function isOk(mmap,rid){return !!(mmap&&mmap[rid]&&mmap[rid].ok);}
+function okCount(mmap){return MISSION_TEMPLATES.filter(t=>isOk(mmap,t.id)).length;}
+function myRoomNow(){
+  const rid=Object.keys(occupy).find(k=>occupy[k]&&String(occupy[k].team)===String(team));
+  return rid||null;
+}
+function timeAgo(ts){
+  if(!ts)return "";
+  const m=Math.floor((Date.now()-ts)/60000);
+  return m<1?"방금":m+"분 전";
+}
+
+/* ===================== 관리자: 교실 선생님 화면 ===================== */
+function pickTeacherRoom(rid){
+  teacherRoom=rid;
+  localStorage.setItem("mission_teacher_room",rid);
+  renderTeacherTab();
+}
+function markSuccess(n,rid){
+  const r=roomOf(rid);
+  if(!confirm(n+"조의 '"+r.name+" - "+r.title+"' 미션을 성공 처리할까요?"))return;
+  const updates={};
+  updates["team"+n+"/missions/"+rid]={ok:true,ts:Date.now()};
+  const occ=(lastAllData.occupy||{})[rid];
+  if(occ&&String(occ.team)===String(n))updates["occupy/"+rid]=null; // 교실을 비워서 다른 조가 바로 들어올 수 있게
+  dbRoot.update(updates).catch(e=>alert("저장하지 못했어요: "+e.message));
+}
+function undoSuccess(n,rid){
+  if(!confirm(n+"조의 '"+roomOf(rid).name+"' 미션 성공을 취소할까요?"))return;
+  dbRoot.child("team"+n+"/missions/"+rid).remove();
+}
+function clearRoom(rid){
+  const occ=(lastAllData.occupy||{})[rid];
+  if(!occ)return;
+  if(!confirm(occ.team+"조를 '"+roomOf(rid).name+"'에서 내보내고 교실을 비울까요?\n(미션 성공 처리는 되지 않아요)"))return;
+  dbRoot.child("occupy/"+rid).remove();
+}
+function viewPhoto(n,rid){
+  const p=(((lastAllData["team"+n]||{}).photos)||{})[rid];
+  document.getElementById("workModalTitle").textContent=n+"조 · "+roomOf(rid).name+" 인증샷";
+  document.getElementById("workModalBody").innerHTML=p&&p.data?'<img src="'+p.data+'" style="max-width:100%;border-radius:8px;"><div style="font-size:12px;color:var(--tx2);margin-top:6px;">'+timeAgo(p.ts)+' 올림</div>':'<div class="empty-msg">아직 올린 사진이 없어요.</div>';
+  document.getElementById("workModalOv").className="modal-ov show";
+}
+function closeWorkModal(){document.getElementById("workModalOv").className="modal-ov";}
+function photoBtnHtml(n,rid){
+  const p=(((lastAllData["team"+n]||{}).photos)||{})[rid];
+  return p&&p.data?'<button class="btn btn-sub mini" onclick="viewPhoto('+n+',\''+rid+'\')">📸 인증샷 보기</button>':'';
+}
+function renderTeacherTab(){
+  const el=document.getElementById("viewTeacher");
+  let h='<div class="card"><b>내가 맡은 교실을 골라주세요</b><div class="tch-room-pick" style="margin-top:10px;">';
+  allRooms().forEach(r=>{
+    h+='<button class="tch-room-btn'+(teacherRoom===r.id?" on":"")+'" onclick="pickTeacherRoom(\''+r.id+'\')">'+r.emoji+' '+escapeHtml(r.name)+'</button>';
+  });
+  h+='</div></div>';
+  const r=roomOf(teacherRoom);
+  if(!r){el.innerHTML=h;return;}
+  const occ=(lastAllData.occupy||{})[r.id];
+  h+='<div class="card" style="border:3px solid '+(occ?"#F59E0B":"var(--green)")+';">';
+  h+='<div style="font-size:13px;color:var(--tx2);">'+r.emoji+' '+escapeHtml(r.name)+' 미션</div>';
+  h+='<div style="font-size:19px;font-weight:900;color:var(--navy);margin:2px 0 4px;">'+escapeHtml(r.title)+'</div>';
+  h+='<div style="font-size:13px;margin-bottom:12px;">🎯 '+escapeHtml(r.goal)+'</div>';
+  if(occ){
+    const n=occ.team;
+    const done=isOk(teamMissionsFromAll(n),r.id);
+    h+='<div style="background:#FFFBEB;border-radius:10px;padding:14px;">';
+    h+='<div style="font-size:13px;color:#92400E;font-weight:800;">🔴 지금 미션 중 · '+timeAgo(occ.ts)+' 입장</div>';
+    h+='<div style="font-size:26px;font-weight:900;margin:4px 0;">'+n+'조</div><div style="font-size:12px;color:var(--tx2);margin-bottom:10px;">'+memberText(n)+'</div>';
+    h+='<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">';
+    if(!done)h+='<button class="btn btn-ok" onclick="markSuccess('+n+',\''+r.id+'\')">✅ '+n+'조 미션 성공</button>';
+    h+=photoBtnHtml(n,r.id);
+    h+='<button class="btn btn-sub" onclick="clearRoom(\''+r.id+'\')">🚪 실패 · 교실 비우기</button></div></div>';
+  }else{
+    h+='<div style="background:#EAFBF1;border-radius:10px;padding:14px;color:var(--green);font-weight:800;">🟢 지금 비어 있어요. 조장이 태블릿에서 "미션 시작"을 누르면 여기에 표시돼요.</div>';
+  }
+  h+='</div>';
+  if(teamCount<1){
+    h+='<div class="card"><div class="empty-msg">아직 편성된 조가 없어요. "학생 배정" 탭에서 명단을 올려주세요.</div></div>';
+    el.innerHTML=h;return;
+  }
+  h+='<div class="card"><b>전체 조 목록</b><div style="font-size:11px;color:var(--tx2);margin:4px 0 6px;">"미션 시작"을 누르지 않은 조도 여기서 바로 성공 처리할 수 있어요.</div>';
+  for(let n=1;n<=teamCount;n++){
+    const done=isOk(teamMissionsFromAll(n),r.id);
+    const here=occ&&String(occ.team)===String(n);
+    h+='<div class="tch-team"><span class="nm">'+n+'조</span><span class="mem">'+(memberText(n)||'&nbsp;')+(here?'<span class="here-tag">미션 중</span>':'')+'</span>';
+    h+=photoBtnHtml(n,r.id);
+    if(done)h+='<span style="color:var(--green);font-weight:900;">✅ 성공</span><button class="btn btn-sub mini" onclick="undoSuccess('+n+',\''+r.id+'\')">성공 취소</button>';
+    else h+='<button class="btn btn-ok" style="font-size:13px;padding:8px 14px;" onclick="markSuccess('+n+',\''+r.id+'\')">✅ 미션 성공</button>';
+    h+='</div>';
+  }
+  h+='</div>';
+  el.innerHTML=h;
+}
+
+/* ===================== 관리자: 대시보드 ===================== */
+function renderDash(){
+  const el=document.getElementById("viewDash");
+  const occAll=lastAllData.occupy||{};
+  let h='<div class="card"><h3 style="margin-bottom:8px;">🚪 교실 사용 현황</h3><table><tr>';
+  allRooms().forEach(r=>h+='<th>'+r.emoji+' '+escapeHtml(r.name)+'</th>');
+  h+='</tr><tr>';
+  allRooms().forEach(r=>{
+    const o=occAll[r.id];
+    h+=o?'<td style="background:#FFFBEB;"><b style="color:#92400E;">🔴 '+o.team+'조 미션 중</b><br><span style="font-size:10px;color:var(--tx2)">'+timeAgo(o.ts)+'</span><br><button class="reset-mini" onclick="clearRoom(\''+r.id+'\')">비우기</button></td>':'<td style="color:var(--green);font-weight:800;">🟢 비어 있음</td>';
+  });
+  h+='</tr></table></div>';
+  if(teamCount<1){
+    el.innerHTML=h+'<div class="card"><div class="empty-msg">아직 편성된 조가 없어요. "학생 배정" 탭에서 명단을 올려주세요.</div></div>';
+    return;
+  }
+  h+='<div class="actions"><button class="btn btn-danger" onclick="resetAll()">🗑 전체 초기화 (모든 조)</button></div>';
+  h+='<div class="card" style="overflow-x:auto;"><table><tr><th>조</th>';
+  allRooms().forEach(r=>h+='<th>'+r.emoji+' '+escapeHtml(r.name)+'</th>');
+  h+='<th>🔑 열쇠</th><th>조 초기화</th></tr>';
+  for(let n=1;n<=teamCount;n++){
+    const mm=teamMissionsFromAll(n);
+    const cnt=okCount(mm);
+    h+='<tr><td style="min-width:120px;"><b style="font-size:16px;display:block;">'+n+'조'+(cnt===MISSION_COUNT?' 🎉':'')+'</b><span style="font-size:11px;color:var(--tx2);word-break:keep-all;">'+memberText(n)+'</span></td>';
+    allRooms().forEach(r=>{
+      const o=occAll[r.id];
+      if(isOk(mm,r.id))h+='<td class="cell-ok">✅<br><button class="reset-mini" onclick="undoSuccess('+n+',\''+r.id+'\')">취소</button></td>';
+      else h+='<td>'+(o&&String(o.team)===String(n)?'<span class="here-tag" style="margin:0 0 4px;">미션 중</span><br>':'')+'<button class="btn btn-sub mini" onclick="markSuccess('+n+',\''+r.id+'\')">성공</button></td>';
+    });
+    h+='<td class="keycount">'+cnt+' / '+MISSION_COUNT+'</td>';
+    h+='<td><button class="btn btn-sub mini" onclick="resetTeam('+n+')">↺ 초기화</button></td></tr>';
+  }
+  h+='</table></div>';
+  el.innerHTML=h;
+}
+function resetAll(){
+  if(!confirm("정말 모든 조의 미션 기록과 교실 사용 현황을 초기화할까요?\n(리허설 후 실제 행사 전에만 사용하세요)"))return;
+  const updates={occupy:null,"meta/completionCounter":null};
+  Object.keys(lastAllData).forEach(k=>{if(/^team\d+$/.test(k))updates[k]=null;});
+  dbRoot.update(updates).then(()=>alert("초기화되었습니다."));
+}
+function resetTeam(n){
+  if(!confirm(n+"조의 미션 기록을 모두 초기화할까요?"))return;
+  const updates={};
+  updates["team"+n]=null;
+  Object.keys(lastAllData.occupy||{}).forEach(rid=>{if(String(lastAllData.occupy[rid].team)===String(n))updates["occupy/"+rid]=null;});
+  dbRoot.update(updates).then(()=>alert(n+"조가 초기화되었습니다."));
+}
+
+/* ===================== 관리자: 미션 관리 ===================== */
+function saveMission(rid){
+  const g=id=>(document.getElementById(id+"_"+rid)||{}).value||"";
+  const data={title:g("mTitle").trim(),goal:g("mGoal").trim(),desc:g("mDesc").trim(),yt:g("mYt").trim()};
+  if(!data.title||!data.goal){alert("미션 이름과 목표는 비워둘 수 없어요.");return;}
+  if(data.yt&&!youtubeEmbed(data.yt)){alert("유튜브 주소를 인식하지 못했어요. 영상 주소를 다시 확인해주세요.");return;}
+  db.ref(ESC_ROOT+"/meta/missionCustom/"+rid).set(data).then(()=>alert("저장했어요. 학생 태블릿에 바로 반영됩니다."));
+}
+function resetMission(rid){
+  if(!confirm("이 미션 내용을 처음 기본값으로 되돌릴까요?"))return;
+  db.ref(ESC_ROOT+"/meta/missionCustom/"+rid).remove();
+}
+function toggleRoomGallery(rid){
+  const el=document.getElementById("roomGallery_"+rid);
+  if(el)el.style.display=el.style.display==="flex"?"none":"flex";
+}
+function pickRoomTheme(rid,idx){
+  const g=ROOM_PHOTO_GALLERY[idx];
+  db.ref(ESC_ROOT+"/meta/roomCustom/"+rid).set({name:g.label,emoji:g.emoji,photo:g.file});
+}
+function renameRoom(rid){
+  const r=roomOf(rid);
+  const nm=prompt("교실 이름을 입력하세요",r.name);
+  if(!nm||!nm.trim())return;
+  db.ref(ESC_ROOT+"/meta/roomCustom/"+rid).set({name:nm.trim(),emoji:r.emoji,photo:r.photo});
+}
+function resetRoomTheme(rid){db.ref(ESC_ROOT+"/meta/roomCustom/"+rid).remove();}
+function renderMissionsTab(){
+  const el=document.getElementById("viewMissions");
+  // 입력 중에 다른 조가 성공 처리돼서 화면이 다시 그려지면 쓰던 글이 날아가므로, 입력란에 포커스가 있으면 다시 그리지 않는다
+  if(el.contains(document.activeElement)&&/INPUT|TEXTAREA/.test(document.activeElement.tagName))return;
+  let h='<div class="card"><h3 style="margin-bottom:6px;">📝 미션 관리</h3><div style="font-size:12px;color:var(--tx2);">미션 내용을 고치고 <b>저장</b>을 누르면 학생 태블릿에 바로 반영돼요. 설명은 줄바꿈이 그대로 보여요.</div></div>';
+  allRooms().forEach((r,i)=>{
+    h+='<div class="card"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">';
+    h+='<img src="assets/'+r.photo+'" alt="" style="width:72px;height:52px;object-fit:cover;border-radius:6px;border:1px solid var(--bdr);">';
+    h+='<b style="font-size:15px;">'+(i+1)+'. '+r.emoji+' '+escapeHtml(r.name)+'</b>';
+    h+='<button class="btn btn-sub mini" onclick="renameRoom(\''+r.id+'\')">✏️ 이름</button>';
+    h+='<button class="btn btn-sub mini" onclick="toggleRoomGallery(\''+r.id+'\')">🖼️ 사진</button>';
+    if(roomCustom[r.id])h+='<button class="btn btn-sub mini" onclick="resetRoomTheme(\''+r.id+'\')">사진·이름 기본값</button>';
+    h+='</div><div id="roomGallery_'+r.id+'" style="display:none;flex-wrap:wrap;gap:8px;padding:10px 0;">';
+    ROOM_PHOTO_GALLERY.forEach((g,gi)=>{
+      const sel=g.file===r.photo;
+      h+='<div style="width:84px;text-align:center;cursor:pointer;" onclick="pickRoomTheme(\''+r.id+'\','+gi+')"><img src="assets/'+g.file+'" alt="" style="width:80px;height:60px;object-fit:cover;border-radius:6px;'+(sel?"border:3px solid var(--sky);":"border:1px solid var(--bdr);opacity:.85;")+'"><div style="font-size:10px;color:var(--tx2);">'+g.emoji+' '+escapeHtml(g.label)+'</div></div>';
+    });
+    h+='</div><div class="medit">';
+    h+='<label>미션 이름</label><input id="mTitle_'+r.id+'" value="'+escapeHtml(r.title)+'">';
+    h+='<label>목표 (학생 화면에 크게 표시)</label><input id="mGoal_'+r.id+'" value="'+escapeHtml(r.goal)+'">';
+    h+='<label>방법 설명</label><textarea id="mDesc_'+r.id+'">'+escapeHtml(r.desc)+'</textarea>';
+    h+='<label>연습 영상 유튜브 주소 (없으면 비워두기 · 시작 시간 ?t=562 포함 가능)</label><input id="mYt_'+r.id+'" value="'+escapeHtml(r.yt||"")+'">';
+    h+='<div class="actions" style="margin:10px 0 0;">'+(missionCustom[r.id]?'<button class="btn btn-sub" onclick="resetMission(\''+r.id+'\')">기본값으로</button>':'')+'<button class="btn btn-primary" onclick="saveMission(\''+r.id+'\')">저장</button></div>';
+    h+='</div></div>';
+  });
+  el.innerHTML=h;
+}
+
+/* ===================== 관리자: 학생 배정 ===================== */
+/* 첫 줄(제목 줄)에 "조"와 "이름" 칸이 있으면 시트에 적힌 조를 그대로 쓴다.
+   없으면 기존 방식("학년, 이름" 또는 "학년, 반, 이름")으로 읽어서 자동 편성한다. */
+function parseRosterWithTeams(rows){
+  if(!rows||rows.length<2)return null;
+  const hd=rows[0].map(c=>(c||"").toString().replace(/\s/g,""));
+  const find=re=>hd.findIndex(c=>re.test(c));
+  const iTeam=find(/^(조|모둠|팀|조번호|모둠번호)$|^(조|모둠)\(?/);
+  const iName=find(/이름|성명/);
+  if(iTeam<0||iName<0)return null;
+  const iGrade=find(/학년/),iCls=find(/^반$|^반\(?/);
+  const out=[];
+  rows.slice(1).forEach(row=>{
+    const name=(row[iName]||"").toString().trim();
+    const tm=((row[iTeam]||"").toString().match(/\d+/)||[])[0];
+    if(!name)return;
+    const grade=iGrade>=0?parseInt(((row[iGrade]||"").toString().match(/\d+/)||[])[0],10):NaN;
+    out.push({name,grade:Number.isInteger(grade)?grade:"",cls:iCls>=0?(row[iCls]||"").toString().trim():"",teamId:tm?Number(tm):""});
+  });
+  return out.length?out:null;
+}
+function rowsToStudents(rows){
+  const withTeams=parseRosterWithTeams(rows);
+  if(withTeams)return withTeams;
+  return RosterUtils.parseRosterRows(rows);
+}
+function saveTeamCount(){
+  const n=Math.floor(Number(document.getElementById("teamCountQuick").value));
+  if(!(n>=1&&n<=30)){alert("1~30 사이로 입력해주세요.");return;}
+  db.ref(ESC_ROOT+"/meta/teamCount").set(n).then(()=>alert(n+"개 조로 저장했어요. 조장 태블릿에서 1조~"+n+"조 중 우리 조를 고르면 돼요."));
+}
+function renderRosterTab(){
+  let h='<div class="card"><h3 style="margin-bottom:6px;">조 개수</h3>'
+    +'<div style="font-size:12px;color:var(--tx2);margin-bottom:8px;">학생 명단 없이 조 개수만 정해도 바로 쓸 수 있어요. 조장 태블릿에는 "1조, 2조 …" 버튼만 보여요.</div>'
+    +'<input type="number" id="teamCountQuick" min="1" max="30" value="'+(teamCount||5)+'" style="width:70px;padding:6px;border:1px solid var(--bdr);border-radius:6px;"> 개 조 '
+    +'<button class="btn btn-primary" style="padding:6px 14px;font-size:12px" onclick="saveTeamCount()">저장</button></div>';
+  h+='<div class="card"><h3 style="margin-bottom:8px;">(선택) 명단 업로드</h3><div style="font-size:12px;color:var(--tx2);margin-bottom:8px;">조 화면에 학생 이름도 함께 보여주고 싶을 때만 올리세요.</div>';
+  h+='<div style="margin-bottom:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">';
+  h+='<input type="text" id="sheetUrlInp" placeholder="구글시트 링크 붙여넣기" style="flex:1;min-width:220px;padding:8px;border:1px solid var(--bdr);border-radius:6px;font-size:12px;">';
+  h+='<button class="btn btn-primary" onclick="loadFromGoogleSheet()">불러오기</button></div>';
+  h+='<div style="margin-bottom:10px;"><input type="file" id="excelFileInp" accept=".xlsx,.xls" onchange="loadFromExcelFile(this.files[0])"></div>';
+  h+='<div style="font-size:11px;color:var(--tx2);line-height:1.7;">※ 구글시트 공유 설정은 "링크가 있는 모든 사용자 - 뷰어"여야 해요.<br>※ 첫 줄에 <b>조, 이름</b> 제목이 있으면 시트의 조 그대로 편성돼요. (예: 조 | 학년 | 이름)<br>※ 조 칸이 없으면 "학년, 이름" 형식으로 읽고 자동으로 조를 나눠줘요.</div>';
+  h+='<div id="rosterUploadErr" style="display:none;color:var(--red);font-size:12px;margin-top:10px;"></div>';
+  h+='</div>';
+  if(parsedRosterPreview){
+    const hasTeams=parsedRosterPreview.some(s=>s.teamId);
+    h+='<div class="card"><h3 style="margin-bottom:8px;">명단 미리보기 · 확인 후 수정 가능 ('+parsedRosterPreview.length+'명)</h3>';
+    h+='<table><tr><th>조</th><th>학년</th><th>반</th><th>이름</th><th></th></tr>';
+    parsedRosterPreview.forEach((s,i)=>{
+      h+='<tr><td><input type="number" min="1" max="30" value="'+(s.teamId||"")+'" placeholder="자동" style="width:56px" onchange="updatePreviewRow('+i+',\'teamId\',this.value)"></td>';
+      h+='<td><input type="number" min="1" max="6" value="'+(s.grade||"")+'" style="width:50px" onchange="updatePreviewRow('+i+',\'grade\',this.value)"></td>';
+      h+='<td><input type="text" value="'+escapeHtml(s.cls||"")+'" placeholder="(선택)" style="width:50px" onchange="updatePreviewRow('+i+',\'cls\',this.value)"></td>';
+      h+='<td><input type="text" value="'+escapeHtml(s.name)+'" onchange="updatePreviewRow('+i+',\'name\',this.value)"></td>';
+      h+='<td><button class="btn btn-sub" style="padding:4px 8px;font-size:11px" onclick="removePreviewRow('+i+')">삭제</button></td></tr>';
+    });
+    h+='</table>';
+    if(!hasTeams){
+      h+='<div style="margin-top:10px;font-size:12px;">시트에 조가 없어서 자동으로 나눠요. 조 개수 <input type="number" id="teamCountInp" min="1" max="30" value="'+(teamCount||6)+'" style="width:60px;padding:4px;border:1px solid var(--bdr);border-radius:6px;"></div>';
+    }
+    h+='<div class="actions" style="margin-top:10px;"><button class="btn btn-sub" onclick="addPreviewRow()">+ 행 추가</button><button class="btn btn-sub" onclick="parsedRosterPreview=null;renderRosterTab()">취소</button><button class="btn btn-primary" onclick="confirmRoster()">이 명단으로 저장하기</button></div>';
+    h+='</div>';
+  }
+  const keys=Object.keys(rosterAll);
+  if(keys.length===0){
+    h+='<div class="card"><div class="empty-msg">아직 편성된 명단이 없어요.</div></div>';
+    document.getElementById("viewRoster").innerHTML=h;
+    return;
+  }
+  h+='<div class="card"><table><tr><th>이름</th><th>학년</th><th>반</th><th>조 배정</th><th>삭제</th></tr>';
+  const groups={};
+  keys.forEach(k=>{const gid=rosterAll[k].teamId?String(rosterAll[k].teamId):"";(groups[gid]=groups[gid]||[]).push(k);});
+  const order=[];
+  for(let n=1;n<=teamCount;n++)if(groups[String(n)])order.push(String(n));
+  if(groups[""])order.push("");
+  order.forEach(gid=>{
+    h+='<tr><td colspan="5" style="background:#F0F3F7;font-weight:800;text-align:left;padding:8px 10px;">'+(gid?gid+"조":"미배정")+' ('+groups[gid].length+'명)</td></tr>';
+    groups[gid].sort((a,b)=>(rosterAll[b].grade||0)-(rosterAll[a].grade||0)||(rosterAll[a].name||"").localeCompare(rosterAll[b].name||"","ko")).forEach(key=>{
+      const s=rosterAll[key];
+      const dk=' data-key="'+escapeHtml(key)+'"';
+      h+='<tr><td><b>'+escapeHtml(s.name||key)+'</b></td><td>'+(s.grade?s.grade+"학년":"-")+'</td><td>'+escapeHtml(s.cls||"-")+'</td>';
+      h+='<td><select class="team-sel"'+dk+'><option value=""'+(!s.teamId?" selected":"")+'>미배정</option>';
+      for(let n=1;n<=teamCount;n++)h+='<option value="'+n+'"'+(String(s.teamId)===String(n)?" selected":"")+'>'+n+'조</option>';
+      h+='</select></td><td><button class="btn btn-danger" style="padding:5px 10px;font-size:11px"'+dk+'>🗑</button></td></tr>';
+    });
+  });
+  h+='</table></div>';
+  document.getElementById("viewRoster").innerHTML=h;
+  document.querySelectorAll("#viewRoster select.team-sel[data-key]").forEach(el=>el.addEventListener("change",()=>db.ref(ESC_ROOT+"/roster/"+el.dataset.key+"/teamId").set(el.value||null)));
+  document.querySelectorAll("#viewRoster .btn-danger[data-key]").forEach(el=>el.addEventListener("click",()=>{
+    const s=rosterAll[el.dataset.key];
+    if(confirm(((s&&s.name)||el.dataset.key)+" 학생을 명단에서 삭제할까요?"))db.ref(ESC_ROOT+"/roster/"+el.dataset.key).remove();
+  }));
+}
+function showRosterUploadErr(msg){
+  const el=document.getElementById("rosterUploadErr");
+  if(el){el.style.display="";el.textContent=msg;}
+}
+function setParsedRoster(students){parsedRosterPreview=students;renderRosterTab();}
+function updatePreviewRow(i,field,val){
+  if(!parsedRosterPreview||!parsedRosterPreview[i])return;
+  parsedRosterPreview[i][field]=(field==="grade"||field==="teamId")?(val===""?"":Number(val)):val;
+}
+function removePreviewRow(i){parsedRosterPreview.splice(i,1);renderRosterTab();}
+function addPreviewRow(){parsedRosterPreview.push({name:"",grade:"",cls:"",teamId:""});renderRosterTab();}
+async function loadFromGoogleSheet(){
+  const url=document.getElementById("sheetUrlInp").value.trim();
+  const id=RosterUtils.extractSheetId(url);
+  if(!id){showRosterUploadErr("올바른 구글시트 링크가 아니에요.");return;}
+  try{
+    // 링크에 gid(시트 탭)가 있으면 그 탭을 읽는다
+    const gid=(url.match(/[#&?]gid=(\d+)/)||[])[1];
+    const res=await fetch(RosterUtils.buildSheetCsvUrl(id)+(gid?"&gid="+gid:""));
+    if(!res.ok)throw new Error("fetch failed");
+    const students=rowsToStudents(RosterUtils.parseCSV(await res.text()));
+    if(!students||students.length===0){showRosterUploadErr("명단을 읽지 못했어요. 첫 줄에 '조, 이름' 제목이 있는지, 또는 '학년, 이름' 형식인지 확인해주세요.");return;}
+    setParsedRoster(students);
+  }catch(e){
+    showRosterUploadErr("시트를 불러오지 못했어요. 공유 설정이 '링크가 있는 모든 사용자 - 뷰어'인지 확인해주세요.");
+  }
+}
+function loadFromExcelFile(file){
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const wb=XLSX.read(e.target.result,{type:"array"});
+      const sheet=wb.Sheets[wb.SheetNames[0]];
+      const rows=XLSX.utils.sheet_to_json(sheet,{header:1}).map(r=>r.map(c=>(c===undefined||c===null)?"":String(c)));
+      const students=rowsToStudents(rows);
+      if(!students||students.length===0){showRosterUploadErr("명단을 읽지 못했어요. 첫 줄에 '조, 이름' 제목이 있는지, 또는 '학년, 이름' 형식인지 확인해주세요.");return;}
+      setParsedRoster(students);
+    }catch(err){showRosterUploadErr("엑셀 파일을 읽지 못했어요.");}
+  };
+  reader.readAsArrayBuffer(file);
+}
+function confirmRoster(){
+  const list=(parsedRosterPreview||[]).filter(s=>s.name&&s.name.trim());
+  if(list.length===0)return;
+  let assigned;
+  const hasTeams=list.some(s=>s.teamId);
+  if(hasTeams){
+    const missing=list.filter(s=>!s.teamId);
+    if(missing.length&&!confirm("조가 비어 있는 학생이 "+missing.length+"명 있어요. (미배정으로 저장돼요) 계속할까요?"))return;
+    assigned=list;
+  }else{
+    const n=Math.min(30,Math.max(1,Math.floor(Number((document.getElementById("teamCountInp")||{}).value))||1));
+    assigned=RosterUtils.autoAssignTeams(list.map(s=>Object.assign({},s,{grade:Number(s.grade)||1})),n);
+  }
+  const tc=assigned.reduce((m,s)=>Math.max(m,Number(s.teamId)||0),0);
+  if(!confirm(list.length+"명 · "+tc+"개 조로 저장할까요? 기존 명단을 덮어씁니다. (미션 진행 기록은 그대로 유지돼요)"))return;
+  const keys=new Set(),roster={};
+  assigned.forEach(s=>{
+    const key=RosterUtils.makeRosterKey(s.name,s.grade||0,keys);
+    keys.add(key);
+    roster[key]={name:s.name.trim(),grade:s.grade||"",cls:s.cls||"",teamId:s.teamId?String(s.teamId):null,ts:Date.now()};
+  });
+  dbRoot.update({roster:roster,"meta/teamCount":tc}).then(()=>{
+    parsedRosterPreview=null;
+    alert("저장되었습니다. 조장 태블릿에서 우리 조를 선택하면 돼요.");
+  }).catch(err=>showRosterUploadErr("저장하지 못했어요: "+err.message));
+}
+
+/* ===================== 학생: 조 선택 ===================== */
+function setHeader(){
+  const el=document.getElementById("hdTeam");
+  if(el)el.textContent=team?(team+"조 · 열쇠 "+okCount(missions)+"/"+MISSION_COUNT):"조 선택 전";
+}
+function adminAccordionHtml(){
+  return '<details class="admin-acc"'+(teacherParam?" open":"")+'><summary>⚙️ 관리자 · 교실 선생님 모드</summary>'
+    +'<div class="admin-acc-body"><input class="txt-inp" type="password" id="adminPw" placeholder="비밀번호" style="max-width:160px;text-transform:none" onkeydown="if(event.key===\'Enter\')tryAdminLogin()">'
+    +'<button class="btn btn-sub" style="padding:0 14px" onclick="tryAdminLogin()">입장</button></div></details>'
+    +'<div class="admin-acc" style="margin-top:10px;"><span style="font-size:11px;color:var(--gs-lilac);cursor:pointer;" onclick="showPublicGuide()">📖 사용설명서</span></div>';
+}
+function renderTeamPick(){
+  // 실시간 갱신으로 다시 그려도 입력 중이던 관리자 비밀번호가 지워지지 않게 보존
+  const pwEl=document.getElementById("adminPw");
+  const keepPw=pwEl?pwEl.value:"",keepOpen=!!(pwEl&&pwEl.closest("details")&&pwEl.closest("details").open),keepFocus=pwEl&&document.activeElement===pwEl;
+  renderTeamPickInner();
+  const np=document.getElementById("adminPw");
+  if(np&&(keepPw||keepOpen||keepFocus)){np.value=keepPw;np.closest("details").open=true;if(keepFocus)np.focus();}
+}
+function renderTeamPickInner(){
+  view="teamPick";
+  setScene("gate");
+  setHeader();
+  const decor='<img class="decor-img gs-drift" src="assets/common_bat.png" alt="" style="left:4%;top:9%;width:70px;">'
+    +'<img class="decor-img gs-drift" src="assets/common_ghost.png" alt="" style="left:7%;bottom:14%;width:84px;filter:drop-shadow(0 0 16px rgba(255,220,150,.35));">';
+  const hero='<div class="hero-block"><div class="wood-sign-wrap"><img class="wood-sign-img" src="assets/prop_wooden_sign.png" alt=""><span class="wood-sign-label">미션 방탈출</span></div><div class="hero-title">유령 학교의 저주</div><div class="hero-sub">6개 교실의 협동 미션</div></div>';
+  if(teacherParam){
+    const r=roomOf(teacherParam);
+    app.innerHTML=decor+hero+'<div class="card" style="text-align:center;"><div class="center-icon">'+(r?r.emoji:"✅")+'</div><h2 style="font-size:17px;margin-bottom:6px;">'+(r?escapeHtml(r.name)+" ":"")+'선생님 화면</h2><p style="font-size:13px;">아래 관리자 비밀번호를 입력하면 이 교실의 미션 성공 버튼 화면이 열려요.</p></div>'+adminAccordionHtml();
+    return;
+  }
+  if(teamCount<1){
+    app.innerHTML=decor+hero+'<div class="card" style="text-align:center;"><div class="center-icon">🗂️</div><h2 style="font-size:16px;margin-bottom:8px;">아직 조가 편성되지 않았어요</h2><p style="font-size:12px;">선생님이 명단을 올려서 조를 편성하면 여기에 표시돼요.</p></div>'+adminAccordionHtml();
+    return;
+  }
+  let h=decor+hero;
+  h+='<div class="card"><h2 style="font-size:16px;margin-bottom:6px;">조장님, 우리 조를 선택하세요</h2><p style="font-size:12px;">이 태블릿은 우리 조 전용이 돼요.</p></div>';
+  h+='<div style="display:flex;flex-direction:column;gap:12px;">';
+  for(let n=1;n<=teamCount;n++){
+    h+='<button class="team-btn" onclick="pickTeam('+n+')"><img class="team-btn-icon" src="'+teamIconSrc(n)+'" alt="'+n+'조"><span class="team-btn-body"><span class="team-btn-name">'+n+'조</span>'+(memberText(n)?'<span class="team-btn-members">'+memberText(n)+'</span>':'')+'</span></button>';
+  }
+  h+='</div>'+adminAccordionHtml();
+  app.innerHTML=h;
+}
+function pickTeam(n){
+  team=String(n);
+  localStorage.setItem("mission_team_"+SCHOOL_ID,team);
+  connectTeam();
+  view="home";renderHome();
+  setTimeout(showInitialGuidePopup,400);
+}
+function leaveTeam(){
+  if(dbRef){dbRef.off();dbRef=null;}
+  team="";
+  localStorage.removeItem("mission_team_"+SCHOOL_ID);
+  missions={};photos={};prevMissions=null;
+}
+function switchTeam(){
+  if(!confirm("다른 조를 선택할까요? (이 태블릿이 다른 조 화면으로 바뀌어요)"))return;
+  leaveTeam();
+  view="teamPick";renderTeamPick();
+}
+function showInitialGuidePopup(){
+  if(appMode!=="student"||view!=="home")return;
+  const body="🎯 6개 교실의 협동 미션을 모두 성공하면 방탈출 성공!<br><br>"
+    +"🟢 <b>비어 있음</b> 교실로 가서, 도착하면 그 교실을 눌러 <b>🚪 미션 시작</b>을 눌러요.<br>"
+    +"🔴 <b>사용 중</b> 교실은 다른 조가 미션 중이에요. 다른 빈 교실부터 가세요.<br>"
+    +"✅ 미션에 성공하면 그 교실 선생님이 <b>미션 성공</b>을 눌러주세요. 그러면 열쇠를 얻어요.<br><br>순서는 상관없어요. 화이팅! 🚀";
+  showInfoModal("assets/prop_wooden_sign.png",team+"조 미션 방탈출 시작!",body);
+}
+function showInfoModal(iconSrc,title,bodyHtml,btnLabel){
+  document.querySelectorAll("#studentRoot .modal-ov").forEach(m=>m.remove()); // 알림이 겹겹이 쌓이지 않게
+  const ov=document.createElement("div");
+  ov.className="modal-ov";
+  ov.innerHTML='<div class="modal-box">'+(iconSrc?'<img class="modal-icon" src="'+iconSrc+'" alt="">':"")
+    +'<h3 style="text-align:center;">'+title+'</h3><p>'+bodyHtml+'</p>'
+    +'<button class="btn btn-lg btn-primary" onclick="this.closest(\'.modal-ov\').remove()">'+(btnLabel||"확인")+'</button></div>';
+  document.getElementById("studentRoot").appendChild(ov);
+}
+function setSync(s){
+  const dot=document.getElementById("syncDot"),txt=document.getElementById("syncTxt");
+  if(!dot)return;
+  dot.className="sync-dot "+(s==="on"?"sync-on":s==="err"?"sync-err":"sync-off");
+  txt.textContent=s==="on"?"실시간 연결됨":s==="err"?"연결 오류":"연결 중";
+}
+
+/* ===================== 학생: 교실 입장/퇴장 (모든 태블릿 실시간 공유) ===================== */
+/* occupy 전체를 transaction으로 바꿔서 두 조가 동시에 같은 교실을 누르는 경우에도 한 조만 들어가게 한다.
+   한 조는 한 번에 한 교실만 쓸 수 있으므로, 다른 교실에 들어가 있었다면 그 교실은 자동으로 비운다. */
+function startMission(rid){
+  if(!team)return;
+  if(isOk(missions,rid)){alert("이미 성공한 교실이에요!");return;}
+  const cur=myRoomNow();
+  if(cur&&cur!==rid&&!confirm("지금 '"+roomOf(cur).name+"'에서 미션 중이에요.\n그 교실을 비우고 '"+roomOf(rid).name+"'(으)로 옮길까요?"))return;
+  let blockedBy=null;
+  dbRoot.child("occupy").transaction(o=>{
+    o=o||{};
+    blockedBy=null;
+    const here=o[rid];
+    if(here&&String(here.team)!==team){blockedBy=here.team;return;} // 다른 조가 사용 중 → 취소
+    Object.keys(o).forEach(k=>{if(o[k]&&String(o[k].team)===team)delete o[k];});
+    o[rid]={team:team,ts:Date.now()};
+    return o;
+  }).then(res=>{
+    if(!res.committed&&blockedBy)showInfoModal("assets/status_locked.png","앗, 한발 늦었어요!",blockedBy+"조가 방금 이 교실에서 미션을 시작했어요.<br>다른 빈 교실로 가보세요!");
+  }).catch(e=>alert("연결이 불안정해요. 다시 눌러주세요. ("+e.message+")"));
+}
+function leaveMission(rid){
+  if(!confirm("미션을 그만두고 이 교실을 비울까요?\n(다른 조가 이 교실을 쓸 수 있게 돼요)"))return;
+  dbRoot.child("occupy/"+rid).transaction(o=>{
+    if(o&&String(o.team)===team)return null;
+    return; // 우리 조가 아니면 건드리지 않음
+  });
+}
+
+/* 도서관 인증샷: 태블릿 카메라로 찍은 사진을 줄여서(최대 900px JPEG) 저장 — 선생님 화면에서 바로 확인 */
+function uploadProof(rid,file){
+  if(!file||!dbRef)return;
+  const msg=document.getElementById("proofMsg");
+  if(msg)msg.textContent="사진 올리는 중...";
+  const img=new Image();
+  const url=URL.createObjectURL(file);
+  img.onload=()=>{
+    const max=900,sc=Math.min(1,max/Math.max(img.width,img.height));
+    const cv=document.createElement("canvas");
+    cv.width=Math.round(img.width*sc);cv.height=Math.round(img.height*sc);
+    cv.getContext("2d").drawImage(img,0,0,cv.width,cv.height);
+    URL.revokeObjectURL(url);
+    const data=cv.toDataURL("image/jpeg",0.7);
+    dbRef.child("photos/"+rid).set({data,ts:Date.now()})
+      .then(()=>{if(msg)msg.textContent="✅ 올렸어요! 선생님께 확인을 받으세요.";})
+      .catch(e=>{if(msg)msg.textContent="올리지 못했어요: "+e.message;});
+  };
+  img.onerror=()=>{if(msg)msg.textContent="사진을 읽지 못했어요. 다시 찍어주세요.";};
+  img.src=url;
+}
+
+/* ===================== 학생: 홈 (교실 지도) ===================== */
+function roomState(rid){
+  if(isOk(missions,rid))return "done";
+  const o=occupy[rid];
+  if(!o)return "free";
+  return String(o.team)===team?"mine":"busy";
+}
+function renderHome(){
+  view="home";
+  setScene("village");
+  setHeader();
+  const cnt=okCount(missions);
+  let h='<img class="decor-img gs-flicker" src="assets/prop_lantern.png" alt="" style="left:2%;bottom:6%;width:64px;filter:drop-shadow(0 0 22px rgba(255,180,80,.6));">'
+    +'<img class="decor-img" src="assets/common_spider_web.png" alt="" style="right:0;top:0;width:110px;opacity:.5;">';
+  if(cnt>=MISSION_COUNT){
+    h+='<div class="finale" style="padding:20px 16px;"><div class="em">🎉🏆✨</div><h2>모든 미션 완료!</h2><p>정말 대단해요! 우리 조가 방탈출에 성공했어요.</p></div>';
+  }
+  const mine=myRoomNow();
+  h+='<div class="stage"><div class="side-panel">';
+  h+='<img class="team-icon-img" src="'+teamIconSrc(Number(team))+'" alt="'+team+'조">';
+  h+='<div class="key-row">';
+  for(let i=0;i<MISSION_COUNT;i++)h+='<img class="key-icon'+(i<cnt?"":" off")+'" src="assets/common_key.png" alt="">';
+  h+='</div>';
+  h+='<div class="note-box">열쇠 '+cnt+' / '+MISSION_COUNT+'<br><span class="sub">6개 교실 미션 모두 성공 시 탈출</span></div>';
+  h+='<div class="note-box" style="font-size:12px;text-align:left;font-weight:700;line-height:1.9;">🟢 비어 있음 · 가도 돼요<br>🔴 사용 중 · 다른 조 미션 중<br>🟡 우리 조 미션 중<br>✅ 우리 조 성공</div>';
+  if(mine)h+='<button class="btn btn-lg btn-primary" onclick="openRoomDetail(\''+mine+'\')">🟡 '+escapeHtml(roomOf(mine).name)+' 미션 화면</button>';
+  h+='<div class="team-switch" onclick="switchTeam()">다른 조 선택</div>';
+  h+='</div><div class="room-grid-3col">';
+  allRooms().forEach(r=>{
+    const st=roomState(r.id);
+    const o=occupy[r.id];
+    let badge;
+    if(st==="done")badge='<div class="room-prog">✅ 우리 조 성공!</div>';
+    else if(st==="mine")badge='<div class="room-prog" style="color:var(--gs-gold)">🟡 우리 조 미션 중</div>';
+    else if(st==="busy")badge='<div class="room-prog" style="color:var(--gs-red)">🔴 사용 중 ('+escapeHtml(o.team)+'조)</div>';
+    else badge='<div class="room-prog" style="color:var(--gs-green)">🟢 비어 있음</div>';
+    const style=st==="busy"?"filter:saturate(.35) brightness(.7);border-color:rgba(255,143,160,.7);":st==="mine"?"border-color:var(--gs-gold);box-shadow:0 0 22px rgba(255,205,120,.7);":"";
+    h+='<div class="room-card has-photo'+(st==="done"?" done":"")+'" style="--room-photo:url(\'assets/'+r.photo+'\');'+style+'" onclick="openRoomDetail(\''+r.id+'\')">'
+      +'<div class="room-name">'+r.emoji+' '+escapeHtml(r.name)+'</div>'
+      +'<div class="room-mission">'+escapeHtml(r.title)+'</div>'+badge+'</div>';
+  });
+  h+='</div></div>';
+  app.innerHTML=h;
+  if(pendingCelebration){pendingCelebration=false;showCelebration();}
+}
+function openRoomDetail(rid){view="roomDetail";renderRoomDetail(rid);}
+function goHome(){view="home";renderHome();}
+
+/* ===================== 학생: 교실 미션 화면 ===================== */
+function renderRoomDetail(rid){
+  const r=roomOf(rid);
+  if(!r){goHome();return;}
+  view="roomDetail";currentRoomDetailId=rid;
+  setScene("study");
+  setHeader();
+  const st=roomState(rid);
+  const o=occupy[rid];
+  // 영상이 재생 중일 때 실시간 갱신으로 화면을 통째로 다시 그리면 영상이 끊기므로, 상태 영역만 갈아끼운다
+  const ytEl=document.getElementById("ytFrame");
+  if(ytEl&&ytEl.dataset.rid===rid&&document.getElementById("missionStatus")){
+    document.getElementById("missionStatus").innerHTML=statusHtml(rid,st,o);
+    return;
+  }
+  let h='<div class="top-back" onclick="goHome()">← 교실 지도로</div>';
+  h+='<div class="parchment-frame"><div class="parchment-frame-inner">';
+  h+='<img class="room-photo-lg" src="assets/'+r.photo+'" alt="">';
+  h+='<div class="room-title">'+r.emoji+' '+escapeHtml(r.name)+'</div>';
+  h+='<span class="mission-badge">협동 미션</span>';
+  h+='<div class="mission-title">'+escapeHtml(r.title)+'</div>';
+  h+='<div class="mission-goal"><span class="lbl">🎯 미션 목표</span>'+escapeHtml(r.goal)+'</div>';
+  h+='<div id="missionStatus" style="width:100%">'+statusHtml(rid,st,o)+'</div>';
+  if(r.desc)h+='<div class="mission-desc">'+escapeHtml(r.desc)+'</div>';
+  const emb=youtubeEmbed(r.yt);
+  if(emb){
+    h+='<div class="mission-desc" style="white-space:normal;font-weight:800;">📺 연습 영상</div>';
+    h+='<div class="yt-wrap"><iframe id="ytFrame" data-rid="'+rid+'" src="'+emb+'" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>';
+    h+='<a class="yt-link" href="'+escapeHtml(r.yt)+'" target="_blank" rel="noopener">▶ 영상이 안 나오면 여기를 눌러 유튜브에서 보기</a>';
+  }
+  if(r.photoProof){
+    const p=photos[rid];
+    h+='<div class="photo-box"><b style="font-size:14px;">📸 인증샷</b>'
+      +'<div style="margin-top:8px;"><label class="btn btn-sub" style="display:inline-block;padding:10px 16px;font-size:14px;">📸 인증샷 찍기<input type="file" accept="image/*" capture="environment" style="display:none" onchange="uploadProof(\''+rid+'\',this.files[0])"></label></div>'
+      +'<div id="proofMsg" style="font-size:12px;margin-top:6px;font-weight:700;"></div>'
+      +(p&&p.data?'<img src="'+p.data+'" alt="인증샷">':'')+'</div>';
+  }
+  h+='</div></div>';
+  h+='<button class="btn btn-lg btn-sub" style="margin-top:14px;max-width:520px;display:block;margin-left:auto;margin-right:auto;" onclick="goHome()">← 교실 지도로</button>';
+  app.innerHTML=h;
+}
+function statusHtml(rid,st,o){
+  if(st==="done")return '<div class="fb-box fb-ok"><img src="assets/status_success.png" alt="">미션 성공! 이 교실의 열쇠를 얻었어요 🔑</div>';
+  if(st==="busy")return '<div class="wait-box" style="color:var(--gs-red)">🔴 지금 <b>'+escapeHtml(o.team)+'조</b>가 이 교실에서 미션 중이에요.<br>다른 빈 교실(🟢)에 먼저 가보세요! 비면 바로 화면이 바뀌어요.</div>';
+  if(st==="mine")return '<div class="wait-box">🟡 <b>우리 조 미션 진행 중!</b><br>미션에 성공하면 선생님께 <b>"미션 성공"</b>을 눌러달라고 하세요.<br>선생님이 누르면 이 화면이 자동으로 바뀌어요.</div>'
+    +'<div style="margin-top:8px;font-size:12px;"><span style="text-decoration:underline;cursor:pointer;color:var(--gs-ink-brown-2);" onclick="leaveMission(\''+rid+'\')">미션 그만두고 교실 비우기</span></div>';
+  return '<div class="wait-box" style="color:var(--gs-green)">🟢 지금 비어 있어요! 교실에 도착하면 아래 버튼을 눌러주세요.</div>'
+    +'<button class="btn btn-lg btn-primary" style="margin-top:10px" onclick="startMission(\''+rid+'\')">🚪 우리 조가 이 교실에서 미션 시작!</button>';
+}
+
+/* ===================== 학생: 성공 알림 · 축하 화면 ===================== */
+function handleMissionChanges(){
+  if(prevMissions===null){prevMissions=Object.assign({},missions);return;} // 첫 수신 때는 알림 없음
+  const newly=MISSION_TEMPLATES.filter(t=>isOk(missions,t.id)&&!isOk(prevMissions,t.id));
+  prevMissions=Object.assign({},missions);
+  if(!newly.length||appMode!=="student")return;
+  if(okCount(missions)>=MISSION_COUNT){
+    document.querySelectorAll("#studentRoot .modal-ov").forEach(m=>m.remove());
+    setTimeout(showCelebration,300);return;
+  }
+  const r=roomOf(newly[0].id);
+  showInfoModal("assets/common_key.png",r.emoji+" "+escapeHtml(r.name)+" 미션 성공!","열쇠를 하나 얻었어요! 🔑 ("+okCount(missions)+" / "+MISSION_COUNT+")<br><br>교실 지도에서 🟢 <b>비어 있는</b> 다음 교실로 이동하세요!","교실 지도 보기");
+}
+function claimCompletionRank(){
+  if(!dbRef)return Promise.resolve(null);
+  return dbRef.child("completionRank").once("value").then(snap=>{
+    if(snap.exists())return snap.val();
+    return dbRoot.child("meta/completionCounter").transaction(cur=>(cur||0)+1).then(res=>{
+      if(!res.committed)return null;
+      const rank=res.snapshot.val();
+      dbRef.child("completionRank").set(rank);
+      return rank;
+    });
+  }).catch(()=>null);
+}
+function showCelebration(){
+  const ov=document.createElement("div");
+  ov.className="celebrate-ov";
+  let keys='<div class="key-row">';
+  for(let i=0;i<MISSION_COUNT;i++)keys+='<img class="key-icon" src="assets/common_key.png" alt="">';
+  keys+='</div>';
+  ov.innerHTML='<canvas class="confetti-cv" id="confettiCv"></canvas>'
+    +'<div class="celebrate-inner">'
+    +'<div class="side-panel"><img class="team-icon-img" src="'+teamIconSrc(Number(team))+'" alt="'+team+'조"><div class="curse-title">저주가<br>풀렸다</div>'+keys+'</div>'
+    +'<div><img class="chest-img" src="assets/prop_treasure_chest.png" alt="">'
+    +'<div class="result-card"><div style="font-family:\'Nanum Myeongjo\',serif;font-size:22px;font-weight:800;color:var(--gs-ink-brown);text-align:center;">열쇠 '+MISSION_COUNT+'개를 모두 되찾았다</div>'
+    +'<div id="rankBadge" style="text-align:center;font-size:14px;font-weight:800;color:#a8741a;min-height:1.4em;margin-top:6px;"></div>'
+    +'<div class="result-stats">'
+    +'<div class="result-stat"><div class="label">성공한 미션</div><div class="value">'+MISSION_COUNT+' / '+MISSION_COUNT+'</div></div>'
+    +'<div class="result-stat"><div class="label">팀워크</div><div class="value">최고!</div></div>'
+    +'</div>'
+    +'<div style="margin-top:20px;font-size:14.5px;line-height:1.9;color:var(--gs-ink-brown-2);">함께 힘을 모은 덕분에 유령들이 손을 흔들며 사라졌습니다.<br>학교는 다시 조용해졌어요.</div>'
+    +'<button class="btn btn-lg btn-primary" style="margin-top:22px" onclick="this.closest(\'.celebrate-ov\').remove()">확인</button>'
+    +'</div></div></div>';
+  document.getElementById("studentRoot").appendChild(ov);
+  runConfetti();
+  claimCompletionRank().then(rank=>{
+    if(!rank)return;
+    const badge=document.getElementById("rankBadge");
+    if(badge)badge.textContent="🏅 "+rank+"번째로 방탈출에 성공했어요!";
+  });
+}
+function runConfetti(){
+  if(window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+  const cv=document.getElementById("confettiCv");
+  if(!cv)return;
+  cv.width=window.innerWidth;cv.height=window.innerHeight;
+  const ctx=cv.getContext("2d");
+  const colors=["#FFD700","#FF6B9D","#4DA3E8","#2DAA6E","#B15CFF","#E8833A"];
+  const pieces=Array.from({length:140},()=>({x:Math.random()*cv.width,y:-20-Math.random()*cv.height,w:6+Math.random()*6,h:8+Math.random()*10,vy:2+Math.random()*3,vx:-1.5+Math.random()*3,rot:Math.random()*360,vr:-6+Math.random()*12,color:colors[Math.floor(Math.random()*colors.length)]}));
+  let frame=0;
+  function tick(){
+    frame++;
+    if(!document.getElementById("confettiCv"))return;
+    ctx.clearRect(0,0,cv.width,cv.height);
+    pieces.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.rot+=p.vr;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot*Math.PI/180);ctx.fillStyle=p.color;ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);ctx.restore();});
+    if(frame<260)requestAnimationFrame(tick);
+    else ctx.clearRect(0,0,cv.width,cv.height);
+  }
+  tick();
+}
+
+/* ===================== 데이터 연결 ===================== */
+function rerenderStudent(){
+  if(appMode!=="student")return;
+  if(view==="teamPick")renderTeamPick();
+  else if(view==="home")renderHome();
+  else if(view==="roomDetail")renderRoomDetail(currentRoomDetailId);
+}
+function connectTeam(){
+  if(!team)return;
+  if(dbRef)dbRef.off();
+  prevMissions=null;
+  dbRef=db.ref(ESC_ROOT+"/team"+team);
+  dbRef.on("value",snap=>{
+    setSync("on");
+    const d=snap.val()||{};
+    missions=d.missions||{};
+    photos=d.photos||{};
+    handleMissionChanges();
+    if(view==="home")renderHome();
+    else if(view==="roomDetail")renderRoomDetail(currentRoomDetailId);
+    else setHeader();
+  },()=>setSync("err"));
+}
+function connectShared(){
+  db.ref(".info/connected").on("value",s=>setSync(s.val()?"on":"off"));
+  db.ref(ESC_ROOT+"/occupy").on("value",snap=>{
+    occupy=snap.val()||{};
+    if(appMode==="student"&&(view==="home"||view==="roomDetail"))rerenderStudent();
+  });
+  db.ref(ESC_ROOT+"/roster").on("value",snap=>{
+    rosterAll=snap.val()||{};
+    if(appMode==="student"&&view==="teamPick")renderTeamPick();
+    if(appMode==="admin"){renderRosterTab();renderAdminViews();}
+  });
+  db.ref(ESC_ROOT+"/meta/teamCount").on("value",snap=>{
+    teamCount=snap.exists()?(snap.val()||0):5; // 설정 전에는 기본 5개 조
+    if(appMode==="student"&&team&&Number(team)>teamCount&&snap.exists()){
+      leaveTeam();view="teamPick";renderTeamPick();return;
+    }
+    if(appMode==="student"&&view==="teamPick")renderTeamPick();
+    if(appMode==="admin"){renderRosterTab();renderAdminViews();}
+  });
+  db.ref(ESC_ROOT+"/meta/roomCustom").on("value",snap=>{
+    roomCustom=snap.val()||{};
+    rerenderStudent();renderAdminViews();
+  });
+  db.ref(ESC_ROOT+"/meta/missionCustom").on("value",snap=>{
+    missionCustom=snap.val()||{};
+    if(appMode==="student"&&view==="roomDetail"){const f=document.getElementById("ytFrame");if(f)f.removeAttribute("id");}
+    rerenderStudent();renderAdminViews();
+  });
+}
+
+/* ===================== 시작 ===================== */
+connectShared();
+connectAdminPw();
+if(sessionStorage.getItem("mission_want_public_guide")==="1"){
+  sessionStorage.removeItem("mission_want_public_guide");
+  showPublicGuide();
+}else if(sessionStorage.getItem("mission_admin_ok")==="1"){
+  enterAdminMode();
+}else if(team&&!teacherParam){
+  connectTeam();
+  view="home";renderHome();
+}else{
+  view="teamPick";renderTeamPick();
+}
+</script>
+</body>
+</html>
