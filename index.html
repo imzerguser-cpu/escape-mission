@@ -371,6 +371,22 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);
 .admin-scope .medit label{display:block;font-size:11px;font-weight:700;color:var(--tx2);margin:6px 0 2px;}
 .admin-scope .medit input,.admin-scope .medit textarea{width:100%;padding:7px 8px;border:1px solid var(--bdr);border-radius:6px;font-size:13px;font-family:inherit;}
 .admin-scope .medit textarea{min-height:110px;}
+#studentRoot .key-bar{background:rgba(30,20,56,.9);border:2px solid rgba(255,205,130,.45);border-radius:16px;padding:12px 12px 10px;margin-bottom:16px;box-shadow:0 10px 26px rgba(0,0,0,.55);position:relative;z-index:1;}
+#studentRoot .key-bar-hd{text-align:center;font-family:'Nanum Myeongjo',serif;font-size:17px;font-weight:800;color:var(--gs-gold-lt);margin-bottom:8px;}
+#studentRoot .key-bar-hd b{color:var(--gs-gold);font-size:22px;}
+#studentRoot .key-slots{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;}
+#studentRoot .key-slot{text-align:center;font-size:11px;font-weight:700;color:rgba(201,185,232,.6);line-height:1.3;word-break:keep-all;}
+#studentRoot .key-slot img{width:46px;max-width:100%;display:block;margin:0 auto 3px;filter:grayscale(1) brightness(.45);opacity:.6;}
+#studentRoot .key-slot.on{color:var(--gs-gold-lt);}
+#studentRoot .key-slot.on img{filter:drop-shadow(0 0 12px rgba(255,205,120,.95));opacity:1;}
+#studentRoot .key-slot.new img{animation:key-pop 1.2s ease-out 2;}
+@keyframes key-pop{0%{transform:scale(.3) rotate(-30deg);opacity:0}50%{transform:scale(1.5) rotate(10deg);opacity:1}100%{transform:scale(1) rotate(0)}}
+#studentRoot .modal-box.wide{max-width:520px;}
+#studentRoot .modal-box .key-bar{margin:12px 0 4px;}
+#studentRoot .escape-banner{text-align:center;padding:18px 16px;margin-bottom:16px;border-radius:16px;background-image:linear-gradient(170deg,var(--gs-success-1),var(--gs-success-2));border:2px solid var(--gs-success-border);box-shadow:0 0 30px rgba(140,230,160,.35);position:relative;z-index:1;}
+#studentRoot .escape-banner h2{font-size:30px;color:#fff4dc;text-shadow:0 0 18px rgba(255,190,90,.7);margin:4px 0;}
+#studentRoot .escape-banner p{color:#e6ffe9;font-size:14px;}
+@media (max-width:700px){#studentRoot .key-slot{font-size:9.5px;}#studentRoot .key-slot img{width:34px;}}
 @media (max-width:700px){.admin-scope .tch-room-pick{grid-template-columns:repeat(2,minmax(0,1fr));}}
 </style>
 </head>
@@ -445,8 +461,8 @@ const db=firebase.database();
 const MISSION_TEMPLATES=[
  {id:"M1",emoji:"🥤",name:"1학년 교실",photo:"rooms/grade1_classroom.png",
   title:"3-6-3 컵 쌓기 (더블 스택스)",
-  goal:"2인 1조로 3-6-3 더블 스택스 쌓기를 1분 안에 성공하기!",
-  desc:"① 두 친구가 나란히 서서, 한 사람은 오른손만 · 다른 사람은 왼손만 써요. (두 사람이 한 몸처럼!)\n② 컵 3개 - 6개 - 3개를 차례로 쌓아 피라미드 3개를 만들어요.\n③ 다 쌓았으면 다시 3 - 6 - 3 묶음으로 차곡차곡 내려놓아요.\n④ 선생님이 시간을 재요. 1분 안에 성공하면 통과!\n💡 미션을 시작하기 전에 아래 영상을 보고 연습해보세요.",
+  goal:"2명씩 3팀(6명)이 3-6-3 더블 스택스를 모두 3분 안에 성공하기!",
+  desc:"① 2명씩 짝을 지어 3팀(모두 6명)을 만들어요.\n② 짝끼리 나란히 서서, 한 사람은 오른손만 · 다른 사람은 왼손만 써요. (두 사람이 한 몸처럼!)\n③ 컵 3개 - 6개 - 3개를 차례로 쌓아 피라미드 3개를 만들고, 다시 3 - 6 - 3 묶음으로 차곡차곡 내려놓아요.\n④ 3팀이 모두 성공해야 해요. 선생님이 시간을 재요. 3팀 모두 3분 안에 성공하면 통과!\n💡 미션을 시작하기 전에 아래 영상을 보고 연습해보세요.",
   yt:"https://youtu.be/9WUwd1Teli0?t=562",photoProof:false},
  {id:"M2",emoji:"🪢",name:"VR실",photo:"classroom_vr_photo.png",
   title:"단체 줄넘기",
@@ -1148,13 +1164,14 @@ function showInitialGuidePopup(){
     +"✅ 미션에 성공하면 그 교실 선생님이 <b>미션 성공</b>을 눌러주세요. 그러면 열쇠를 얻어요.<br><br>순서는 상관없어요. 화이팅! 🚀";
   showInfoModal("assets/prop_wooden_sign.png",team+"조 미션 방탈출 시작!",body);
 }
-function showInfoModal(iconSrc,title,bodyHtml,btnLabel){
+function showInfoModal(iconSrc,title,bodyHtml,btnLabel,wide){
   document.querySelectorAll("#studentRoot .modal-ov").forEach(m=>m.remove()); // 알림이 겹겹이 쌓이지 않게
   const ov=document.createElement("div");
   ov.className="modal-ov";
-  ov.innerHTML='<div class="modal-box">'+(iconSrc?'<img class="modal-icon" src="'+iconSrc+'" alt="">':"")
+  ov.innerHTML='<div class="modal-box'+(wide?" wide":"")+'">'+(iconSrc?'<img class="modal-icon" src="'+iconSrc+'" alt="">':"")
     +'<h3 style="text-align:center;">'+title+'</h3><p>'+bodyHtml+'</p>'
     +'<button class="btn btn-lg btn-primary" onclick="this.closest(\'.modal-ov\').remove()">'+(btnLabel||"확인")+'</button></div>';
+  ov.querySelector(".btn").addEventListener("click",()=>{if(view==="roomDetail"&&wide)goHome();});
   document.getElementById("studentRoot").appendChild(ov);
 }
 function setSync(s){
@@ -1222,6 +1239,16 @@ function roomState(rid){
   if(!o)return "free";
   return String(o.team)===team?"mine":"busy";
 }
+/* 교실별 열쇠 6칸 — 성공한 교실의 열쇠만 불이 켜진다. newRid가 있으면 그 열쇠에 획득 애니메이션 */
+function keyBarHtml(newRid){
+  const cnt=okCount(missions);
+  let h='<div class="key-bar"><div class="key-bar-hd">🔑 모은 열쇠 <b>'+cnt+'</b> / '+MISSION_COUNT+(cnt>=MISSION_COUNT?' · 🎉 방탈출 성공!':'')+'</div><div class="key-slots">';
+  allRooms().forEach(r=>{
+    const on=isOk(missions,r.id);
+    h+='<div class="key-slot'+(on?" on":"")+(r.id===newRid?" new":"")+'"><img src="assets/common_key.png" alt="">'+escapeHtml(r.name)+'</div>';
+  });
+  return h+'</div></div>';
+}
 function renderHome(){
   view="home";
   setScene("village");
@@ -1230,14 +1257,13 @@ function renderHome(){
   let h='<img class="decor-img gs-flicker" src="assets/prop_lantern.png" alt="" style="left:2%;bottom:6%;width:64px;filter:drop-shadow(0 0 22px rgba(255,180,80,.6));">'
     +'<img class="decor-img" src="assets/common_spider_web.png" alt="" style="right:0;top:0;width:110px;opacity:.5;">';
   if(cnt>=MISSION_COUNT){
-    h+='<div class="finale" style="padding:20px 16px;"><div class="em">🎉🏆✨</div><h2>모든 미션 완료!</h2><p>정말 대단해요! 우리 조가 방탈출에 성공했어요.</p></div>';
+    h+='<div class="escape-banner"><div style="font-size:44px;">🎉🏆✨</div><h2>방탈출 성공!</h2><p>열쇠 6개를 모두 모았어요. 우리 조가 유령 학교를 탈출했어요!</p>'
+      +'<button class="btn btn-primary" style="margin-top:10px;padding:10px 18px;font-size:14px;" onclick="showCelebration()">🎊 축하 화면 다시 보기</button></div>';
   }
+  h+=keyBarHtml();
   const mine=myRoomNow();
   h+='<div class="stage"><div class="side-panel">';
   h+='<img class="team-icon-img" src="'+teamIconSrc(Number(team))+'" alt="'+team+'조">';
-  h+='<div class="key-row">';
-  for(let i=0;i<MISSION_COUNT;i++)h+='<img class="key-icon'+(i<cnt?"":" off")+'" src="assets/common_key.png" alt="">';
-  h+='</div>';
   h+='<div class="note-box">열쇠 '+cnt+' / '+MISSION_COUNT+'<br><span class="sub">6개 교실 미션 모두 성공 시 탈출</span></div>';
   h+='<div class="note-box" style="font-size:12px;text-align:left;font-weight:700;line-height:1.9;">🟢 비어 있음 · 가도 돼요<br>🔴 사용 중 · 다른 조 미션 중<br>🟡 우리 조 미션 중<br>✅ 우리 조 성공</div>';
   if(mine)h+='<button class="btn btn-lg btn-primary" onclick="openRoomDetail(\''+mine+'\')">🟡 '+escapeHtml(roomOf(mine).name)+' 미션 화면</button>';
@@ -1276,9 +1302,11 @@ function renderRoomDetail(rid){
   const ytEl=document.getElementById("ytFrame");
   if(ytEl&&ytEl.dataset.rid===rid&&document.getElementById("missionStatus")){
     document.getElementById("missionStatus").innerHTML=statusHtml(rid,st,o);
+    const kb=document.getElementById("detailKeyBar");if(kb)kb.innerHTML=keyBarHtml();
     return;
   }
   let h='<div class="top-back" onclick="goHome()">← 교실 지도로</div>';
+  h+='<div id="detailKeyBar" style="max-width:720px;margin:0 auto;">'+keyBarHtml()+'</div>';
   h+='<div class="parchment-frame"><div class="parchment-frame-inner">';
   h+='<img class="room-photo-lg" src="assets/'+r.photo+'" alt="">';
   h+='<div class="room-title">'+r.emoji+' '+escapeHtml(r.name)+'</div>';
@@ -1315,7 +1343,11 @@ function statusHtml(rid,st,o){
 
 /* ===================== 학생: 성공 알림 · 축하 화면 ===================== */
 function handleMissionChanges(){
-  if(prevMissions===null){prevMissions=Object.assign({},missions);return;} // 첫 수신 때는 알림 없음
+  if(prevMissions===null){ // 첫 수신 때는 알림 없음 — 단, 이 태블릿에서 아직 축하 화면을 못 봤는데 이미 다 성공했다면 보여준다
+    prevMissions=Object.assign({},missions);
+    if(okCount(missions)>=MISSION_COUNT&&appMode==="student"&&localStorage.getItem(celebratedKey())!=="1")setTimeout(showCelebration,500);
+    return;
+  }
   const newly=MISSION_TEMPLATES.filter(t=>isOk(missions,t.id)&&!isOk(prevMissions,t.id));
   prevMissions=Object.assign({},missions);
   if(!newly.length||appMode!=="student")return;
@@ -1324,7 +1356,11 @@ function handleMissionChanges(){
     setTimeout(showCelebration,300);return;
   }
   const r=roomOf(newly[0].id);
-  showInfoModal("assets/common_key.png",r.emoji+" "+escapeHtml(r.name)+" 미션 성공!","열쇠를 하나 얻었어요! 🔑 ("+okCount(missions)+" / "+MISSION_COUNT+")<br><br>교실 지도에서 🟢 <b>비어 있는</b> 다음 교실로 이동하세요!","교실 지도 보기");
+  showInfoModal("assets/common_key.png",r.emoji+" "+escapeHtml(r.name)+" 미션 성공!",
+    '<span style="display:block;text-align:center;font-size:16px;font-weight:800;color:var(--gs-ink-brown);">'+escapeHtml(r.name)+'의 열쇠를 얻었어요! 🔑</span>'
+    +keyBarHtml(newly[0].id)
+    +'<span style="display:block;text-align:center;">앞으로 <b>'+(MISSION_COUNT-okCount(missions))+'개</b> 남았어요. 교실 지도에서 🟢 <b>비어 있는</b> 다음 교실로 이동하세요!</span>',
+    "교실 지도 보기",true);
 }
 function claimCompletionRank(){
   if(!dbRef)return Promise.resolve(null);
@@ -1338,7 +1374,10 @@ function claimCompletionRank(){
     });
   }).catch(()=>null);
 }
+function celebratedKey(){return "mission_celebrated_"+SCHOOL_ID+"_"+team;}
 function showCelebration(){
+  try{localStorage.setItem(celebratedKey(),"1");}catch(e){}
+  document.querySelectorAll("#studentRoot .modal-ov,#studentRoot .celebrate-ov").forEach(m=>m.remove());
   const ov=document.createElement("div");
   ov.className="celebrate-ov";
   let keys='<div class="key-row">';
@@ -1348,7 +1387,7 @@ function showCelebration(){
     +'<div class="celebrate-inner">'
     +'<div class="side-panel"><img class="team-icon-img" src="'+teamIconSrc(Number(team))+'" alt="'+team+'조"><div class="curse-title">저주가<br>풀렸다</div>'+keys+'</div>'
     +'<div><img class="chest-img" src="assets/prop_treasure_chest.png" alt="">'
-    +'<div class="result-card"><div style="font-family:\'Nanum Myeongjo\',serif;font-size:22px;font-weight:800;color:var(--gs-ink-brown);text-align:center;">열쇠 '+MISSION_COUNT+'개를 모두 되찾았다</div>'
+    +'<div class="result-card"><div style="font-family:Nanum Myeongjo,serif;font-size:34px;font-weight:800;color:#b5361f;text-align:center;margin-bottom:6px;">🎉 방탈출 성공! 🎉</div><div style="font-family:\'Nanum Myeongjo\',serif;font-size:22px;font-weight:800;color:var(--gs-ink-brown);text-align:center;">열쇠 '+MISSION_COUNT+'개를 모두 되찾았다</div>'
     +'<div id="rankBadge" style="text-align:center;font-size:14px;font-weight:800;color:#a8741a;min-height:1.4em;margin-top:6px;"></div>'
     +'<div class="result-stats">'
     +'<div class="result-stat"><div class="label">성공한 미션</div><div class="value">'+MISSION_COUNT+' / '+MISSION_COUNT+'</div></div>'
