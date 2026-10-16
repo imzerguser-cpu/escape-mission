@@ -1146,6 +1146,13 @@ function setHeader(){
   const el=document.getElementById("hdTeam");
   if(el)el.textContent=team?(team+"조 · 열쇠 "+okCount(missions)+"/"+MISSION_COUNT):"조 선택 전";
 }
+/* 조를 고른 뒤 교실 지도 화면에서도 관리자 모드로 들어갈 수 있게 (조 선택은 그대로 유지) */
+function promptAdmin(){
+  const v=prompt("관리자 비밀번호를 입력하세요");
+  if(v==null)return;
+  if(v.trim()===(SCHOOL_ADMIN_PW||"escape2026")){sessionStorage.setItem("mission_admin_ok","1");enterAdminMode();}
+  else alert("비밀번호가 올바르지 않아요.");
+}
 function adminAccordionHtml(){
   return '<details class="admin-acc"'+(teacherParam?" open":"")+'><summary>⚙️ 관리자 · 교실 선생님 모드</summary>'
     +'<div class="admin-acc-body"><input class="txt-inp" type="password" id="adminPw" placeholder="비밀번호" style="max-width:160px;text-transform:none" onkeydown="if(event.key===\'Enter\')tryAdminLogin()">'
@@ -1603,6 +1610,7 @@ function renderHome(){
   h+='<div class="note-box" style="font-size:12px;text-align:left;font-weight:700;line-height:1.9;">🟢 비어 있음 · 가도 돼요<br>🔴 사용 중 · 다른 조 미션 중<br>🟡 우리 조 미션 중<br>✅ 우리 조 성공</div>';
   if(mine)h+='<button class="btn btn-lg btn-primary" onclick="openRoomDetail(\''+mine+'\')">🟡 '+escapeHtml(roomOf(mine).name)+' 미션 화면</button>';
   h+='<div class="team-switch" onclick="switchTeam()">다른 조 선택</div>';
+  h+='<div class="team-switch" style="margin-top:8px;opacity:.75;" onclick="promptAdmin()">⚙️ 관리자 모드</div>';
   h+='</div><div class="room-grid-3col">';
   allRooms().forEach(r=>{
     const st=roomState(r.id);
