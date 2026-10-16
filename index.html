@@ -1270,6 +1270,7 @@ function leaveMission(rid){
    5초 카운트다운 중 화면의 어두운 곳에 귀신(ghosts/free)이 1초쯤 비쳤다 사라지고, 셔터 직전 큰 얼굴 + 비명.
    귀신이 나온 순간부터 학생 반응을 몰래 연사 5장 + 영상으로 남긴다. 귀신은 화면에만 나오고 인증샷에는 안 남는다. */
 let cam=null;
+const ghostCamOn=false; // 사용자 요청(2026-10-16): 귀신 기능 없이 인증샷만. 귀신 엔진 코드는 남겨 둠 — true로 바꾸면 다시 켜짐
 let camFacing=localStorage.getItem("mission_cam_facing")||"user"; // 앞면(셀카) 기본 — 조원이 다 같이 화면을 보며 찍으므로
 let freeLib=null;
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -1287,7 +1288,7 @@ function openProofCamera(rid){
     +'<button class="btn btn-sub" id="camSwitch" onclick="switchProofCamera()">🔄 카메라</button></div>';
   document.getElementById("studentRoot").appendChild(ov);
   if(window.Sfx)Sfx.unlock();
-  loadFree().catch(()=>{});
+  if(ghostCamOn)loadFree().catch(()=>{});
   startCamStream();
 }
 async function startCamStream(){
@@ -1440,16 +1441,19 @@ async function shootProof(){
   if(window.Sfx)Sfx.unlock();
   ["camShutter","camCancel","camSwitch"].forEach(id=>{const b=document.getElementById(id);if(b)b.disabled=true;});
   const rid=cam.rid,n=5;
-  const react=cam.react=startReaction();
+  const ghostOn=ghostCamOn; // 꺼져 있으면 귀신·깜짝 얼굴·비명·놀람 연사/영상 없이 5초 뒤 인증샷만
+  const react=cam.react=ghostOn?startReaction():null;
   const start=performance.now();
-  // 귀신: 카운트다운 0.9초쯤 나타나 1초 남짓 머문다 → 그 순간 놀람 연사
-  planScreenGhost().then(p=>{
-    if(!p||!cam)return;
-    const wait=Math.max(0,start+900-performance.now());
-    cam.timers.push(setTimeout(()=>{if(!cam)return;playScreenGhost(p,1000+Math.random()*300);triggerReaction(react);},wait));
-  }).catch(()=>{});
-  // 깜짝 얼굴 + 비명: 셔터 1.5초 전
-  cam.timers.push(setTimeout(()=>{if(cam)playJumpFace().then(ok=>{if(ok)triggerReaction(react);});},n*1000-1500));
+  if(ghostOn){
+    // 귀신: 카운트다운 0.9초쯤 나타나 1초 남짓 머문다 → 그 순간 놀람 연사
+    planScreenGhost().then(p=>{
+      if(!p||!cam)return;
+      const wait=Math.max(0,start+900-performance.now());
+      cam.timers.push(setTimeout(()=>{if(!cam)return;playScreenGhost(p,1000+Math.random()*300);triggerReaction(react);},wait));
+    }).catch(()=>{});
+    // 깜짝 얼굴 + 비명: 셔터 1.5초 전
+    cam.timers.push(setTimeout(()=>{if(cam)playJumpFace().then(ok=>{if(ok)triggerReaction(react);});},n*1000-1500));
+  }
   await countdown(n);
   if(!cam)return;
   cancelAnimationFrame(cam.raf);
@@ -1457,8 +1461,11 @@ async function shootProof(){
   const proof=grabFrame(900);
   camFlash();
   if(window.Sfx)Sfx.play("knock",0.3);
-  await sleep(1500); // 셔터 뒤 반응까지 조금 더 녹화
-  const res=await finishReaction(react);
+  let res={frames:[],video:null,ext:"jpg"};
+  if(react){
+    await sleep(1500); // 셔터 뒤 반응까지 조금 더 녹화
+    res=await finishReaction(react);
+  }
   closeProofCamera();
   showInfoModal("assets/common_scroll.png","사진을 저장하고 있어요...","잠시만 기다려 주세요. 📤");
   try{

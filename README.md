@@ -6,7 +6,7 @@
 |---|---|
 | 1학년 교실 | 2명씩 3팀(6명) 3-6-3 더블 스택스 모두 3분 안에 성공 (연습 영상 포함) |
 | VR실 | 단체 줄넘기 20개 (걸린 것 포함) |
-| 도서관 | 그림책 찾기 — 귀신이 나오는 그림책 3권 찾아 인증샷 (귀신 카메라: 화면 귀신 + 깜짝 얼굴, 놀람 연사·영상) |
+| 도서관 | 그림책 찾기 — 귀신이 나오는 그림책 3권 찾아 인증샷 (5초 뒤 찰칵) |
 | 컴퓨터실 | 굴러가는 훌라후프 통과하기 (서로 다른 3명) |
 | 영어체험실 | 숟가락을 입에 물고 탁구공 옮기기 — 태블릿 타이머 2분 안에 완료하면 자동 성공 |
 | 과학실 | 컵 12개에 탁구공 5개 넣기 (한 사람씩 돌아가며, 7명 조는 1명이 한 번 더) |
@@ -15,5 +15,5 @@
 - 교실 선생님: `?teacher=M1`~`M6` 주소 → 관리자 비밀번호 → "미션 성공" 버튼 (누르면 교실이 즉시 비워짐)
 - 6개 미션을 모두 성공하면 방탈출 완료
 - 데이터는 Firebase `escape_data/mission_app` 아래에 저장 (기존 escape 데이터와 분리)
-- 도서관 인증샷·놀람 사진/영상: Firebase `escape_data/mission_media` + halloween 앱과 같은 구글 드라이브(시트 스크립트). 비밀 키는 기기별(localStorage) 저장, halloween 앱의 `hg_conf`가 있으면 그대로 사용
-- `scripts/ghost-free.js`, `scripts/sfx.js`, `ghosts/free/` 는 halloween 저장소에서 가져옴
+- 도서관 인증샷: Firebase `escape_data/mission_media` + halloween 앱과 같은 구글 드라이브(시트 스크립트). 비밀 키는 기기별(localStorage) 저장, halloween 앱의 `hg_conf`가 있으면 그대로 사용
+- 귀신 카메라(`scripts/ghost-free.js`, `scripts/sfx.js`, `ghosts/free/`, halloween 저장소에서 가져옴)는 현재 꺼 둠 — index.html의 `ghostCamOn`을 true로 바꾸면 다시 켜짐
