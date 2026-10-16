@@ -355,6 +355,23 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);
 #studentRoot .yt-link{display:inline-block;margin-top:8px;font-size:13px;font-weight:800;color:#8a1c1c;text-decoration:underline;}
 #studentRoot .photo-box{width:100%;margin-top:12px;background:rgba(255,250,235,.55);border:1px dashed rgba(140,105,55,.55);border-radius:12px;padding:12px;}
 #studentRoot .photo-box img{max-width:100%;max-height:320px;border-radius:10px;margin-top:8px;box-shadow:0 4px 12px rgba(0,0,0,.35);}
+/* 귀신 카메라 (halloween 저장소의 도서실 인증샷 기능에서 가져옴) */
+#studentRoot .cam-ov{position:fixed;inset:0;z-index:400;background:#000;display:flex;flex-direction:column;}
+#studentRoot .cam-stage{position:relative;flex:1;overflow:hidden;}
+#studentRoot .cam-stage video,#studentRoot .cam-stage canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+#studentRoot .cam-stage .mirror{transform:scaleX(-1);}
+#studentRoot .cam-stage canvas{pointer-events:none;}
+#studentRoot .cam-stage video.glitch{filter:contrast(1.6) brightness(1.4) hue-rotate(160deg) saturate(.4);transform:translateX(6px);}
+#studentRoot .cam-stage video.mirror.glitch{transform:scaleX(-1) translateX(6px);}
+#studentRoot .cam-count{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center;font-size:140px;font-weight:900;color:#fff;text-shadow:0 0 30px rgba(0,0,0,.9);pointer-events:none;font-family:'Nanum Myeongjo',serif;}
+#studentRoot .cam-top{position:absolute;left:0;right:0;top:0;padding:12px;text-align:center;color:#fff;font-weight:800;font-size:15px;background:linear-gradient(180deg,rgba(0,0,0,.7),rgba(0,0,0,0));pointer-events:none;}
+#studentRoot .cam-flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;transition:opacity .25s;}
+#studentRoot .cam-flash.on{opacity:1;transition:none;}
+#studentRoot .cam-bar{display:flex;gap:10px;align-items:center;justify-content:center;padding:14px;background:#0b0814;}
+#studentRoot .cam-bar .btn{padding:14px 18px;font-size:16px;}
+#studentRoot .cam-shutter{width:84px;height:84px;border-radius:50%;border:6px solid #fff;background:#e0465a;color:#fff;font-size:28px;cursor:pointer;}
+#studentRoot .cam-shutter:disabled{opacity:.4;}
+#studentRoot .timer-disp{font-family:'Nanum Myeongjo',serif;font-size:72px;font-weight:800;line-height:1.1;color:#fff4dc;text-shadow:0 0 18px rgba(255,190,90,.6);}
 #studentRoot .wait-box{width:100%;margin-top:14px;padding:14px;border-radius:12px;font-size:14.5px;font-weight:800;text-align:center;background:rgba(46,32,80,.7);color:var(--gs-gold-lt);border:1px solid rgba(255,205,130,.35);line-height:1.6;word-break:keep-all;}
 .admin-scope .tch-room-pick{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;}
 .admin-scope .tch-room-btn{border:2px solid var(--bdr);background:#fff;border-radius:12px;padding:14px 8px;font-family:inherit;font-size:15px;font-weight:800;color:var(--navy);cursor:pointer;}
@@ -446,6 +463,8 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="scripts/roster-utils.js"></script>
+<script src="scripts/sfx.js"></script>
+<script src="scripts/ghost-free.js"></script>
 <script>
 window.addEventListener("error",function(e){
   const el=document.getElementById("globalErr")||document.getElementById("app");
@@ -470,9 +489,9 @@ const MISSION_TEMPLATES=[
   desc:"① 두 사람이 긴 줄을 돌리고, 나머지 친구들은 줄 안에서 다 함께 뛰어요.\n② 중간에 줄에 걸려도 괜찮아요! 걸린 것까지 포함해서 모두 20개를 채우면 성공이에요.\n③ 다 같이 큰 소리로 숫자를 세어보세요.\n④ 20개를 채우면 선생님께 확인을 받아요.",
   yt:"",photoProof:false},
  {id:"M3",emoji:"📚",name:"도서관",photo:"classroom_library_photo.png",
-  title:"귀신 책 · 그림책 찾기",
-  goal:"귀신 이야기 책 또는 그림이 있는 그림책 3권을 찾아 인증샷 찍기!",
-  desc:"① 도서관 책장에서 귀신(유령·도깨비) 이야기 책이나 그림이 있는 그림책을 찾아요.\n② 3권을 모두 찾았으면 조원 모두 책과 함께 사진을 찍어요.\n③ 아래 '📸 인증샷 찍기' 버튼으로 사진을 올리고 선생님께 보여드리세요.\n④ 찾은 책은 꼭 제자리에 다시 꽂아주세요!",
+  title:"그림책 찾기",
+  goal:"이야기에 귀신이 나오거나 귀신 그림이 있는 그림책 3권을 찾아 함께 인증샷 찍기!",
+  desc:"① 도서관 책장에서 이야기에 귀신(유령·도깨비)이 나오거나 귀신 그림이 있는 그림책을 찾아요.\n② 3권을 모두 찾았으면 조원 모두 책을 들고 함께 모여요.\n③ 아래 '📸 인증샷 찍기' 버튼을 누르면 5초 뒤에 찰칵! 모두 화면에 들어오게 모여서 찍어요.\n④ 찍은 사진을 선생님께 보여드리고 미션 성공을 받아요.\n④ 찾은 책은 꼭 제자리에 다시 꽂아주세요!",
   yt:"",photoProof:true},
  {id:"M4",emoji:"⭕",name:"컴퓨터실",photo:"classroom_computer_photo.png",
   title:"훌라후프 통과하기",
@@ -481,13 +500,13 @@ const MISSION_TEMPLATES=[
   yt:"",photoProof:false},
  {id:"M5",emoji:"🥄",name:"영어체험실",photo:"classroom_english_photo.png",
   title:"숟가락 탁구공 릴레이",
-  goal:"숟가락을 입에 물고, 탁구공을 떨어뜨리지 않고 팀원끼리 옮기기!",
-  desc:"① 조원 모두 숟가락을 하나씩 입에 물고 한 줄로 서요.\n② 첫 번째 친구가 입에 문 숟가락에 탁구공을 올려요.\n③ 손은 쓰지 않고, 입에 문 숟가락에서 숟가락으로 다음 친구에게 탁구공을 넘겨요.\n④ 마지막 친구까지 떨어뜨리지 않고 옮기면 성공! 떨어지면 처음부터 다시 해요.",
-  yt:"",photoProof:false},
+  goal:"숟가락을 입에 물고, 탁구공을 떨어뜨리지 않고 2분 안에 마지막 사람까지 옮기기!",
+  desc:"① 조원 모두 숟가락을 하나씩 입에 물고 한 줄로 서요.\n② 첫 번째 친구가 태블릿의 '▶ 시작하기'를 누르고, 입에 문 숟가락에 탁구공을 올려요.\n③ 손은 쓰지 않고, 입에 문 숟가락에서 숟가락으로 다음 친구에게 탁구공을 넘겨요.\n④ 마지막 친구까지 옮기면 마지막 친구가 태블릿의 '🏁 완료'를 눌러요.\n⑤ 2분 안에 완료를 누르면 미션 성공! 떨어지면 처음부터 다시 해요.",
+  yt:"",photoProof:false,timer:120},
  {id:"M6",emoji:"🔬",name:"과학실",photo:"rooms/science_room.png",
   title:"탁구공 컵 넣기",
   goal:"컵 12개에 탁구공 5개 넣기!",
-  desc:"① 책상 위에 놓인 컵 12개를 확인해요.\n② 선생님이 정한 선 뒤에서 탁구공을 던지거나 튕겨서 컵 안에 넣어요.\n③ 탁구공 5개가 컵 안에 들어가면 성공!\n💡 던지는 거리·튕기기 같은 규칙은 선생님 안내를 꼭 따라요.",
+  desc:"① 책상 위에 놓인 컵 12개를 확인해요.\n② 한 사람씩 돌아가면서 공을 던질 기회를 가져요. 조원 모두 한 번씩 던져요.\n③ 7명인 조는 1명이 한 번 더 던져도 돼요. (8명인 조와 기회가 똑같아요)\n④ 선생님이 정한 선 뒤에서 탁구공을 던지거나 튕겨서 컵 안에 넣어요.\n⑤ 탁구공 5개가 컵 안에 들어가면 성공!\n💡 던지는 거리·튕기기 같은 규칙은 선생님 안내를 꼭 따라요.",
   yt:"",photoProof:false},
 ];
 /* 관리자가 각 교실의 사진·이름을 바꿀 수 있는 갤러리 — "미션 관리" 탭의 교실 꾸미기에서 선택 */
@@ -554,6 +573,7 @@ const SCHOOL_ID=(urlParams.get("school")||"").trim().replace(/[^A-Za-z0-9_-]/g,"
 const ESC_ROOT=ESC_BASE+(SCHOOL_ID?("/schools/"+SCHOOL_ID):"");
 const dbRoot=db.ref(ESC_ROOT);
 const teacherParam=(urlParams.get("teacher")||"").toUpperCase();
+const MEDIA_ROOT="escape_data/mission_media"+(SCHOOL_ID?("/schools/"+SCHOOL_ID):"");
 
 /* ===================== 상태 ===================== */
 let appMode="student";
@@ -562,6 +582,7 @@ let teamCount=0;
 let rosterAll={};
 let missions={};      // 우리 조 성공 기록 {M1:{ok:true,ts}}
 let photos={};        // 우리 조 인증샷 {M3:{data,ts}}
+let timers={};        // 제한 시간 미션 {M5:{start}|{fail,sec}|{done,sec}}
 let occupy={};        // 교실 사용 현황 {M1:{team:"3",ts}} — 모든 태블릿이 실시간 공유
 let prevMissions=null;// 성공 알림을 띄우기 위한 직전 상태(첫 수신 때는 null)
 let dbRef=null;
@@ -771,16 +792,34 @@ function clearRoom(rid){
   if(!confirm(occ.team+"조를 '"+roomOf(rid).name+"'에서 내보내고 교실을 비울까요?\n(미션 성공 처리는 되지 않아요)"))return;
   dbRoot.child("occupy/"+rid).remove();
 }
+/* 인증샷 + 놀람 연사·영상. 연사·영상은 용량이 커서 대시보드가 실시간으로 받는 곳(ESC_ROOT)과 분리된
+   MEDIA_ROOT에 저장하고, 선생님이 "보기"를 눌렀을 때만 불러온다 */
 function viewPhoto(n,rid){
   const p=(((lastAllData["team"+n]||{}).photos)||{})[rid];
-  document.getElementById("workModalTitle").textContent=n+"조 · "+roomOf(rid).name+" 인증샷";
-  document.getElementById("workModalBody").innerHTML=p&&p.data?'<img src="'+p.data+'" style="max-width:100%;border-radius:8px;"><div style="font-size:12px;color:var(--tx2);margin-top:6px;">'+timeAgo(p.ts)+' 올림</div>':'<div class="empty-msg">아직 올린 사진이 없어요.</div>';
+  document.getElementById("workModalTitle").textContent=n+"조 · "+roomOf(rid).name+" 인증샷 · 놀람 사진/영상";
+  let h=p&&p.data?'<div class="work-item"><b>인증샷</b> <span style="font-size:12px;color:var(--tx2);">'+timeAgo(p.ts)+'</span><br><img src="'+p.data+'"><br><a class="btn btn-sub mini" style="display:inline-block;margin-top:6px;text-decoration:none;" href="'+p.data+'" download="'+n+'조_인증샷.jpg">⬇️ 저장</a></div>':'<div class="empty-msg">아직 올린 인증샷이 없어요.</div>';
+  h+='<div id="mediaList"><div class="empty-msg">놀람 연사·영상 불러오는 중...</div></div>';
+  document.getElementById("workModalBody").innerHTML=h;
   document.getElementById("workModalOv").className="modal-ov show";
+  db.ref(MEDIA_ROOT+"/team"+n).orderByChild("rid").equalTo(rid).once("value").then(snap=>{
+    const items=[];snap.forEach(c=>{items.push(c.val());});
+    items.sort((a,b)=>(a.ts||0)-(b.ts||0)||(a.seq||0)-(b.seq||0));
+    const el=document.getElementById("mediaList");if(!el)return;
+    if(!items.length){el.innerHTML='<div class="empty-msg">놀람 연사·영상이 없어요.</div>';return;}
+    let m='<div class="work-item"><b>👻 귀신이 나온 순간</b> <span style="font-size:12px;color:var(--tx2);">(사진 '+items.filter(x=>x.kind==="photo").length+'장 · 영상 '+items.filter(x=>x.kind==="video").length+'개)</span>';
+    items.forEach((it,i)=>{
+      const nm=n+"조_놀람_"+(i+1)+(it.kind==="video"?(it.ext?"."+it.ext:".webm"):".jpg");
+      m+='<div style="margin-top:10px;">'+(it.kind==="video"?'<video src="'+it.data+'" controls playsinline style="max-width:100%;border-radius:8px;"></video>':'<img src="'+it.data+'">')
+        +'<br><span style="font-size:11px;color:var(--tx2);">'+escapeHtml(it.label||"")+' · '+timeAgo(it.ts)+'</span> <a class="btn btn-sub mini" style="display:inline-block;text-decoration:none;" href="'+it.data+'" download="'+nm+'">⬇️ 저장</a></div>';
+    });
+    el.innerHTML=m+'</div>';
+  }).catch(e=>{const el=document.getElementById("mediaList");if(el)el.innerHTML='<div class="empty-msg">불러오지 못했어요: '+escapeHtml(e.message)+'</div>';});
 }
-function closeWorkModal(){document.getElementById("workModalOv").className="modal-ov";}
+function closeWorkModal(){document.getElementById("workModalOv").className="modal-ov";document.getElementById("workModalBody").innerHTML="";}
 function photoBtnHtml(n,rid){
-  const p=(((lastAllData["team"+n]||{}).photos)||{})[rid];
-  return p&&p.data?'<button class="btn btn-sub mini" onclick="viewPhoto('+n+',\''+rid+'\')">📸 인증샷 보기</button>':'';
+  const d=lastAllData["team"+n]||{};
+  const p=(d.photos||{})[rid],mc=(d.mediaCount||{})[rid];
+  return (p&&p.data)||mc?'<button class="btn btn-sub mini" onclick="viewPhoto('+n+',\''+rid+'\')">📸 인증샷'+(mc?' · 👻 '+mc:'')+' 보기</button>':'';
 }
 function renderTeacherTab(){
   const el=document.getElementById("viewTeacher");
@@ -805,7 +844,10 @@ function renderTeacherTab(){
     h+='<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">';
     if(!done)h+='<button class="btn btn-ok" onclick="markSuccess('+n+',\''+r.id+'\')">✅ '+n+'조 미션 성공</button>';
     h+=photoBtnHtml(n,r.id);
-    h+='<button class="btn btn-sub" onclick="clearRoom(\''+r.id+'\')">🚪 실패 · 교실 비우기</button></div></div>';
+    h+='<button class="btn btn-sub" onclick="clearRoom(\''+r.id+'\')">🚪 실패 · 교실 비우기</button></div>';
+    const tm=r.timer?(((lastAllData["team"+n]||{}).timers)||{})[r.id]:null;
+    if(r.timer)h+='<div style="margin-top:10px;font-size:13px;font-weight:700;color:#92400E;">⏱ 태블릿 타이머('+fmtSec(r.timer)+'): '+(!tm?"시작 전":tm.start?"진행 중 ("+new Date(tm.start).toLocaleTimeString()+" 시작)":tm.fail?"시간 초과 — 다시 도전 중":tm.done?"성공 ("+tm.sec+"초)":"")+' · 시간 안에 완료를 누르면 자동으로 성공 처리돼요</div>';
+    h+='</div>';
   }else{
     h+='<div style="background:#EAFBF1;border-radius:10px;padding:14px;color:var(--green);font-weight:800;">🟢 지금 비어 있어요. 조장이 태블릿에서 "미션 시작"을 누르면 여기에 표시돼요.</div>';
   }
@@ -867,6 +909,7 @@ function resetAll(){
   if(!confirm("정말 모든 조의 미션 기록과 교실 사용 현황을 초기화할까요?\n(리허설 후 실제 행사 전에만 사용하세요)"))return;
   const updates={occupy:null,"meta/completionCounter":null};
   Object.keys(lastAllData).forEach(k=>{if(/^team\d+$/.test(k))updates[k]=null;});
+  for(let n=1;n<=Math.max(teamCount,30);n++)db.ref(MEDIA_ROOT+"/team"+n).remove().catch(()=>{});
   dbRoot.update(updates).then(()=>alert("초기화되었습니다."));
 }
 function resetTeam(n){
@@ -874,6 +917,7 @@ function resetTeam(n){
   const updates={};
   updates["team"+n]=null;
   Object.keys(lastAllData.occupy||{}).forEach(rid=>{if(String(lastAllData.occupy[rid].team)===String(n))updates["occupy/"+rid]=null;});
+  db.ref(MEDIA_ROOT+"/team"+n).remove().catch(()=>{});
   dbRoot.update(updates).then(()=>alert(n+"조가 초기화되었습니다."));
 }
 
@@ -881,6 +925,7 @@ function resetTeam(n){
 function saveMission(rid){
   const g=id=>(document.getElementById(id+"_"+rid)||{}).value||"";
   const data={title:g("mTitle").trim(),goal:g("mGoal").trim(),desc:g("mDesc").trim(),yt:g("mYt").trim()};
+  if(roomOf(rid).timer||g("mTimer"))data.timer=Math.max(0,Math.round(Number(g("mTimer"))||0));
   if(!data.title||!data.goal){alert("미션 이름과 목표는 비워둘 수 없어요.");return;}
   if(data.yt&&!youtubeEmbed(data.yt)){alert("유튜브 주소를 인식하지 못했어요. 영상 주소를 다시 확인해주세요.");return;}
   db.ref(ESC_ROOT+"/meta/missionCustom/"+rid).set(data).then(()=>alert("저장했어요. 학생 태블릿에 바로 반영됩니다."));
@@ -909,6 +954,7 @@ function renderMissionsTab(){
   // 입력 중에 다른 조가 성공 처리돼서 화면이 다시 그려지면 쓰던 글이 날아가므로, 입력란에 포커스가 있으면 다시 그리지 않는다
   if(el.contains(document.activeElement)&&/INPUT|TEXTAREA/.test(document.activeElement.tagName))return;
   let h='<div class="card"><h3 style="margin-bottom:6px;">📝 미션 관리</h3><div style="font-size:12px;color:var(--tx2);">미션 내용을 고치고 <b>저장</b>을 누르면 학생 태블릿에 바로 반영돼요. 설명은 줄바꿈이 그대로 보여요.</div></div>';
+  h+=driveSettingsHtml();
   allRooms().forEach((r,i)=>{
     h+='<div class="card"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">';
     h+='<img src="assets/'+r.photo+'" alt="" style="width:72px;height:52px;object-fit:cover;border-radius:6px;border:1px solid var(--bdr);">';
@@ -926,6 +972,7 @@ function renderMissionsTab(){
     h+='<label>목표 (학생 화면에 크게 표시)</label><input id="mGoal_'+r.id+'" value="'+escapeHtml(r.goal)+'">';
     h+='<label>방법 설명</label><textarea id="mDesc_'+r.id+'">'+escapeHtml(r.desc)+'</textarea>';
     h+='<label>연습 영상 유튜브 주소 (없으면 비워두기 · 시작 시간 ?t=562 포함 가능)</label><input id="mYt_'+r.id+'" value="'+escapeHtml(r.yt||"")+'">';
+    h+='<label>⏱ 태블릿 타이머 제한 시간(초) — 학생이 시작·완료를 누르고, 시간 안에 완료하면 자동 성공 (0 또는 비워두면 타이머 없음)</label><input id="mTimer_'+r.id+'" type="number" min="0" value="'+(r.timer||"")+'" style="max-width:120px;">';
     h+='<div class="actions" style="margin:10px 0 0;">'+(missionCustom[r.id]?'<button class="btn btn-sub" onclick="resetMission(\''+r.id+'\')">기본값으로</button>':'')+'<button class="btn btn-primary" onclick="saveMission(\''+r.id+'\')">저장</button></div>';
     h+='</div></div>';
   });
@@ -1210,7 +1257,295 @@ function leaveMission(rid){
   });
 }
 
-/* 도서관 인증샷: 태블릿 카메라로 찍은 사진을 줄여서(최대 900px JPEG) 저장 — 선생님 화면에서 바로 확인 */
+/* ===================== 귀신 카메라 (halloween 저장소 도서실 인증샷에서 가져옴) =====================
+   5초 카운트다운 중 화면의 어두운 곳에 귀신(ghosts/free)이 1초쯤 비쳤다 사라지고, 셔터 직전 큰 얼굴 + 비명.
+   귀신이 나온 순간부터 학생 반응을 몰래 연사 5장 + 영상으로 남긴다. 귀신은 화면에만 나오고 인증샷에는 안 남는다. */
+let cam=null;
+let camFacing=localStorage.getItem("mission_cam_facing")||"user"; // 앞면(셀카) 기본 — 조원이 다 같이 화면을 보며 찍으므로
+let freeLib=null;
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function loadFree(){return freeLib||(freeLib=window.GhostFree?GhostFree.load("./").catch(e=>{freeLib=null;throw e;}):Promise.reject(new Error("귀신 그림 없음")));}
+function openProofCamera(rid){
+  if(cam)closeProofCamera();
+  cam={rid,stream:null,busy:false,raf:0,timers:[]};
+  const ov=document.createElement("div");
+  ov.className="cam-ov";ov.id="camOv";
+  ov.innerHTML='<div class="cam-stage"><video id="camVideo" playsinline muted autoplay></video><canvas id="camGhost"></canvas>'
+    +'<div class="cam-top">'+team+'조 · '+escapeHtml(roomOf(rid).name)+' 인증샷 — 조원 모두 화면에 들어오게 모여요!</div>'
+    +'<div class="cam-count" id="camCount"></div><div class="cam-flash" id="camFlash"></div></div>'
+    +'<div class="cam-bar"><button class="btn btn-sub" id="camCancel" onclick="closeProofCamera()">취소</button>'
+    +'<button class="cam-shutter" id="camShutter" onclick="shootProof()">📸</button>'
+    +'<button class="btn btn-sub" id="camSwitch" onclick="switchProofCamera()">🔄 카메라</button></div>';
+  document.getElementById("studentRoot").appendChild(ov);
+  if(window.Sfx)Sfx.unlock();
+  loadFree().catch(()=>{});
+  startCamStream();
+}
+async function startCamStream(){
+  if(!cam)return;
+  if(cam.stream)cam.stream.getTracks().forEach(t=>t.stop());
+  const video={facingMode:{ideal:camFacing},width:{ideal:1280},height:{ideal:720}};
+  try{
+    try{cam.stream=await navigator.mediaDevices.getUserMedia({audio:true,video});}
+    catch(e){cam.stream=await navigator.mediaDevices.getUserMedia({audio:false,video});} // 마이크가 안 되면 소리 없이
+    const v=document.getElementById("camVideo");
+    if(!v||!cam){cam&&cam.stream&&cam.stream.getTracks().forEach(t=>t.stop());return;}
+    v.srcObject=cam.stream;
+    v.classList.toggle("mirror",camFacing==="user");
+    document.getElementById("camGhost").classList.toggle("mirror",camFacing==="user");
+    await v.play().catch(()=>{});
+  }catch(e){
+    closeProofCamera();
+    showInfoModal("assets/status_failure.png","카메라를 열 수 없어요","카메라 사용을 허용했는지 확인해 주세요.<br>안 되면 아래 '사진 파일로 올리기'를 눌러 주세요.");
+  }
+}
+function switchProofCamera(){
+  if(!cam||cam.busy)return;
+  camFacing=camFacing==="user"?"environment":"user";
+  try{localStorage.setItem("mission_cam_facing",camFacing);}catch(e){}
+  startCamStream();
+}
+function closeProofCamera(){
+  if(!cam)return;
+  cam.timers.forEach(clearTimeout);cancelAnimationFrame(cam.raf);
+  if(cam.react&&cam.react.rec&&cam.react.rec.state!=="inactive"){try{cam.react.rec.stop();}catch(e){}}
+  if(cam.stream)cam.stream.getTracks().forEach(t=>t.stop());
+  cam=null;
+  const ov=document.getElementById("camOv");if(ov)ov.remove();
+}
+function grabFrame(max){
+  const v=document.getElementById("camVideo");
+  const k=max?Math.min(1,max/Math.max(v.videoWidth,v.videoHeight)):1;
+  const c=document.createElement("canvas");
+  c.width=Math.round(v.videoWidth*k);c.height=Math.round(v.videoHeight*k);
+  const x=c.getContext("2d");
+  if(camFacing==="user"){x.translate(c.width,0);x.scale(-1,1);} // 셀카는 화면에 보이던 대로(좌우 반전) 저장
+  x.drawImage(v,0,0,c.width,c.height);
+  return c;
+}
+function camFlash(){const f=document.getElementById("camFlash");if(!f)return;f.classList.add("on");setTimeout(()=>f.classList.remove("on"),60);}
+/* 화면에 띄울 귀신 자리 고르기 — 어두운 곳이 없으면(밝은 도서관) 밝은 곳에라도 띄운다 */
+async function planScreenGhost(){
+  const v=document.getElementById("camVideo");
+  if(!cam||!v||!v.videoWidth||!window.GhostFree)return null;
+  const lib=await loadFree();
+  const raw=document.createElement("canvas");raw.width=v.videoWidth;raw.height=v.videoHeight;raw.getContext("2d").drawImage(v,0,0);
+  const opts={stationId:"library",visible:true,selfie:camFacing==="user",mask:false};
+  let p=await GhostFree.plan(raw,lib,opts);
+  if(!p||!p.layer)p=await GhostFree.plan(raw,lib,Object.assign({},opts,{anyLight:true}));
+  return p&&p.layer?p:null;
+}
+/* 귀신을 보여 준다: 0.25초 나타남 → hold 동안 흔들리며 머묾 → 0.35초 사라짐 (은은한 소리와 함께) */
+function playScreenGhost(p,hold){
+  const v=document.getElementById("camVideo"),c=document.getElementById("camGhost");
+  if(!cam||!c)return;
+  c.width=v.videoWidth;c.height=v.videoHeight;
+  const x=c.getContext("2d"),base=Math.min(0.88,Math.max(0.66,p.alpha+0.3)),t0=performance.now(),fin=250,fout=350;
+  const glitch=()=>{v.classList.add("glitch");setTimeout(()=>v.classList.remove("glitch"),140);};
+  glitch();
+  if(window.Sfx)Sfx.play(Math.random()<0.5?"whisper":"creak",0.8);
+  const frame=now=>{
+    const t=now-t0,total=fin+hold+fout;
+    x.clearRect(0,0,c.width,c.height);
+    if(t>=total||!cam){glitch();return;}
+    let a=t<fin?t/fin:t>fin+hold?1-(t-fin-hold)/fout:1;
+    a*=0.86+0.14*Math.sin(t/37)*Math.sin(t/91);
+    x.globalAlpha=Math.max(0,a)*base;
+    x.drawImage(p.layer,p.gx+Math.sin(t/53)*1.5,p.gy);
+    cam.raf=requestAnimationFrame(frame);
+  };
+  cam.raf=requestAnimationFrame(frame);
+}
+/* 깜짝 얼굴: 화면 가득 큰 얼굴이 확 다가오며 흔들리고(0.7초) 비명 */
+async function playJumpFace(){
+  const v=document.getElementById("camVideo"),c=document.getElementById("camGhost");
+  if(!cam||!c||!window.GhostFree)return false;
+  const face=GhostFree.jumpFace(await loadFree(),"library");
+  if(!face||!cam)return false;
+  cancelAnimationFrame(cam.raf);
+  c.width=v.videoWidth;c.height=v.videoHeight;
+  const flip=c.classList.contains("mirror");c.classList.remove("mirror");
+  const x=c.getContext("2d"),t0=performance.now(),dur=700,cnt=document.getElementById("camCount");
+  if(window.Sfx){Sfx.loud("shriek",1);Sfx.loud("impact",0.9);}
+  v.classList.add("glitch");if(cnt)cnt.style.visibility="hidden";
+  const frame=now=>{
+    const t=now-t0;
+    x.clearRect(0,0,c.width,c.height);
+    if(t>=dur||!cam){v.classList.remove("glitch");if(cnt)cnt.style.visibility="";if(flip)c.classList.add("mirror");return;}
+    const k=Math.min(1,t/120),scale=0.75+0.33*k;
+    const h=c.height*1.05*scale,w=h*face.width/face.height;
+    const jx=(Math.random()-0.5)*c.width*0.02,jy=(Math.random()-0.5)*c.height*0.02;
+    x.globalAlpha=1;x.fillStyle="rgba(0,0,0,0.55)";x.fillRect(0,0,c.width,c.height);
+    x.globalAlpha=t>dur-120?(dur-t)/120:0.95;
+    x.drawImage(face,(c.width-w)/2+jx,c.height*0.02+jy,w,h);
+    cam.raf=requestAnimationFrame(frame);
+  };
+  cam.raf=requestAnimationFrame(frame);
+  return true;
+}
+function pickVideoMime(){
+  if(!window.MediaRecorder)return null;
+  for(const m of ["video/mp4;codecs=avc1,mp4a.40.2","video/mp4;codecs=avc1","video/mp4","video/webm;codecs=vp8,opus","video/webm;codecs=vp9,opus","video/webm"]){
+    if(MediaRecorder.isTypeSupported(m))return m;
+  }
+  return null;
+}
+/* 놀람 촬영: 카운트다운 시작부터 몰래 영상 녹화, 귀신이 나온 순간 0.25초 뒤부터 0.2초 간격 5장 */
+function startReaction(){
+  const r={frames:[],chunks:[],fired:false,done:null,rec:null,mime:""};
+  const mime=pickVideoMime();
+  if(mime&&cam&&cam.stream){
+    try{
+      r.rec=new MediaRecorder(cam.stream,{mimeType:mime,videoBitsPerSecond:900000,audioBitsPerSecond:64000});
+      r.rec.ondataavailable=e=>{if(e.data&&e.data.size)r.chunks.push(e.data);};
+      r.rec.start(500);r.mime=mime;
+    }catch(e){r.rec=null;}
+  }
+  return r;
+}
+function triggerReaction(r){
+  if(!r||r.fired)return;
+  r.fired=true;
+  r.done=(async()=>{
+    await sleep(250);
+    for(let i=0;i<5&&cam;i++){r.frames.push(grabFrame(960));if(i<4)await sleep(200);}
+  })();
+}
+async function finishReaction(r){
+  if(r.done)await r.done.catch(()=>{});
+  let video=null;
+  if(r.rec){
+    await new Promise(res=>{r.rec.onstop=res;try{r.rec.stop();}catch(e){res();}setTimeout(res,1500);});
+    if(r.chunks.length)video=new Blob(r.chunks,{type:r.mime.split(";")[0]});
+  }
+  return {frames:r.frames,video,ext:/mp4/.test(r.mime)?"mp4":"webm"};
+}
+const blobToDataUrl=b=>new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.onerror=rej;fr.readAsDataURL(b);});
+async function countdown(n){
+  for(let i=n;i>0;i--){const el=document.getElementById("camCount");if(el)el.textContent=i;await sleep(1000);}
+  const el=document.getElementById("camCount");if(el)el.textContent="";
+}
+async function shootProof(){
+  if(!cam||cam.busy||!cam.stream)return;
+  cam.busy=true;
+  if(window.Sfx)Sfx.unlock();
+  ["camShutter","camCancel","camSwitch"].forEach(id=>{const b=document.getElementById(id);if(b)b.disabled=true;});
+  const rid=cam.rid,n=5;
+  const react=cam.react=startReaction();
+  const start=performance.now();
+  // 귀신: 카운트다운 0.9초쯤 나타나 1초 남짓 머문다 → 그 순간 놀람 연사
+  planScreenGhost().then(p=>{
+    if(!p||!cam)return;
+    const wait=Math.max(0,start+900-performance.now());
+    cam.timers.push(setTimeout(()=>{if(!cam)return;playScreenGhost(p,1000+Math.random()*300);triggerReaction(react);},wait));
+  }).catch(()=>{});
+  // 깜짝 얼굴 + 비명: 셔터 1.5초 전
+  cam.timers.push(setTimeout(()=>{if(cam)playJumpFace().then(ok=>{if(ok)triggerReaction(react);});},n*1000-1500));
+  await countdown(n);
+  if(!cam)return;
+  cancelAnimationFrame(cam.raf);
+  const gc=document.getElementById("camGhost");if(gc)gc.getContext("2d").clearRect(0,0,gc.width,gc.height);
+  const proof=grabFrame(900);
+  camFlash();
+  if(window.Sfx)Sfx.play("knock",0.3);
+  await sleep(1500); // 셔터 뒤 반응까지 조금 더 녹화
+  const res=await finishReaction(react);
+  closeProofCamera();
+  showInfoModal("assets/common_scroll.png","사진을 저장하고 있어요...","잠시만 기다려 주세요. 📤");
+  try{
+    await dbRef.child("photos/"+rid).set({data:proof.toDataURL("image/jpeg",0.75),ts:Date.now()});
+    const mref=db.ref(MEDIA_ROOT+"/team"+team),ts=Date.now();
+    let cnt=0;
+    for(let i=0;i<res.frames.length;i++){
+      await mref.push({kind:"photo",rid,seq:i+1,label:"놀람 연사 "+(i+1)+"/"+res.frames.length,data:res.frames[i].toDataURL("image/jpeg",0.8),ts});cnt++;
+    }
+    if(res.video&&res.video.size<9*1024*1024){
+      await mref.push({kind:"video",rid,seq:99,ext:res.ext,label:"놀람 영상",data:await blobToDataUrl(res.video),ts});cnt++;
+    }
+    if(cnt)await dbRef.child("mediaCount/"+rid).transaction(c=>(c||0)+cnt);
+    const hasDrive=!!driveConf().apiKey;
+    showInfoModal("assets/status_success.png","인증샷을 올렸어요!","📸 사진이 선생님께 전달됐어요."+(hasDrive?"<br>☁️ 구글 드라이브에도 올리고 있어요.":"")+"<br>선생님께 보여드리고 <b>미션 성공</b>을 받아요!");
+    if(hasDrive){ // 드라이브 업로드는 학생을 기다리게 하지 않도록 뒤에서
+      const items=[{blob:await canvasToBlob(proof,0.9),kind:"photo"}];
+      for(let i=0;i<res.frames.length;i++)items.push({blob:await canvasToBlob(res.frames[i],0.9),kind:"photo",reaction:true,seq:i+1});
+      if(res.video)items.push({blob:res.video,kind:"video",reaction:true,ext:res.ext});
+      driveUpload(items,rid);
+    }
+  }catch(e){
+    showInfoModal("assets/status_failure.png","저장하지 못했어요","인터넷 연결을 확인하고 다시 찍어 주세요.<br>("+escapeHtml(e.message)+")");
+  }
+}
+
+/* ===================== 구글 드라이브 저장 (halloween 앱과 같은 시트 스크립트) =====================
+   비밀 키는 공개된 Firebase에 두지 않고 이 기기(localStorage)에만 둔다. halloween 앱과 같은 주소
+   (imzerguser-cpu.github.io)라서, 그 앱을 설정해 둔 태블릿이면 그 키(hg_conf)를 그대로 쓴다. */
+const DRIVE_DEFAULT_URL="https://script.google.com/macros/s/AKfycbxTmQduDTWShxua_fxjRvedt5GN83AOcOgIOKbil9pqCMc__7CDCTP6IOS0IiiPVHoh/exec";
+function driveConf(){
+  let c={};
+  try{c=JSON.parse(localStorage.getItem("mission_drive")||"null")||{};}catch(e){}
+  if(!c.apiKey){try{const h=JSON.parse(localStorage.getItem("hg_conf")||"null");if(h&&h.apiKey)c={apiUrl:h.apiUrl,apiKey:h.apiKey,fromHg:true};}catch(e){}}
+  if(!c.apiUrl)c.apiUrl=DRIVE_DEFAULT_URL;
+  return c;
+}
+function saveDriveConf(){
+  const url=(document.getElementById("driveUrl").value||"").trim()||DRIVE_DEFAULT_URL;
+  const key=(document.getElementById("driveKey").value||"").trim();
+  try{localStorage.setItem("mission_drive",JSON.stringify({apiUrl:url,apiKey:key}));}catch(e){}
+  testDriveConf();
+}
+async function testDriveConf(){
+  const st=document.getElementById("driveStatus");
+  const c=driveConf();
+  if(!c.apiKey){if(st)st.textContent="⚠️ 이 기기에 비밀 키가 없어요.";return;}
+  if(st)st.textContent="확인 중...";
+  try{
+    const r=await fetch(c.apiUrl+(c.apiUrl.includes("?")?"&":"?")+"action=roster&key="+encodeURIComponent(c.apiKey),{cache:"no-store"});
+    const j=await r.json();
+    if(st)st.textContent=j.ok?"✅ 연결됨 — 도서관 인증샷·놀람 사진/영상이 구글 드라이브에도 저장돼요.":"❌ "+(j.error==="key"?"비밀 키가 맞지 않아요":"시트 응답 오류");
+  }catch(e){if(st)st.textContent="❌ 연결 실패: "+e.message;}
+}
+function driveSettingsHtml(){
+  const c=driveConf();
+  return '<div class="card"><h3 style="margin-bottom:6px;">☁️ 구글 드라이브 저장 (할로윈 탐험대와 같은 곳)</h3>'
+    +'<div style="font-size:12px;color:var(--tx2);line-height:1.7;margin-bottom:8px;">도서관 인증샷과 놀람 연사·영상을 할로윈 앱이 쓰는 구글 드라이브에도 올려요. 파일 이름은 <b>N조_도서관(미션방탈출)_…</b>으로 저장돼요.<br>'
+    +'⚠️ 비밀 키는 보안을 위해 <b>이 기기에만</b> 저장돼요. 조장 태블릿마다 한 번씩 관리자 모드로 들어와 넣어 주세요. (할로윈 앱을 설정해 둔 태블릿은 자동으로 연결돼요)</div>'
+    +'<div class="medit" style="border-top:none;padding-top:0;"><label>시트 웹 앱 주소</label><input id="driveUrl" value="'+escapeHtml(c.apiUrl)+'">'
+    +'<label>비밀 키'+(c.fromHg?' (할로윈 앱 설정에서 가져옴)':'')+'</label><input id="driveKey" type="password" value="'+escapeHtml(c.apiKey||"")+'" placeholder="할로윈 앱 연결 탭에 넣었던 비밀 키"></div>'
+    +'<div class="actions" style="margin:10px 0 0;justify-content:flex-start;align-items:center;"><button class="btn btn-primary" onclick="saveDriveConf()">이 기기에 저장하고 연결 확인</button><span id="driveStatus" style="font-size:12px;color:var(--tx2);">'+(c.apiKey?"키 있음 · 확인 버튼을 눌러 보세요":"⚠️ 이 기기에 비밀 키가 없어요")+'</span></div></div>';
+}
+function blobToB64(b){return blobToDataUrl(b).then(s=>s.slice(s.indexOf(";base64,")+8));}
+function canvasToBlob(c,q){return new Promise(res=>c.toBlob(res,"image/jpeg",q||0.9));}
+function pad2(n){return String(n).padStart(2,"0");}
+/* items: [{blob, seq, reaction, kind:"photo"|"video", ext}] → 하나씩 올리고 실패하면 2번 더 시도 */
+async function driveUpload(items,rid){
+  const c=driveConf();
+  if(!c.apiKey||!items.length)return {skipped:true,ok:0,fail:0};
+  const r=roomOf(rid),d=new Date();
+  const t=pad2(d.getMonth()+1)+pad2(d.getDate())+"-"+pad2(d.getHours())+pad2(d.getMinutes())+pad2(d.getSeconds());
+  const stationName=r.name+"(미션방탈출)";
+  let ok=0,fail=0;
+  for(const it of items){
+    const filename=team+"조_"+stationName+"_"+t+(it.reaction?"_놀람":"")+(it.seq?"_"+pad2(it.seq):"")+"_원본."+(it.ext||"jpg");
+    const meta={recId:Date.now()+"-"+Math.random().toString(36).slice(2,7),group:Number(team),stationId:"library",stationName,
+      media:it.kind==="video"?"영상":"사진",needsEdit:false,result:"",record:it.reaction?"놀람 장면"+(it.seq&&it.kind!=="video"?" "+it.seq:""):"인증샷"};
+    let done=false;
+    for(let a=0;a<3&&!done;a++){
+      try{
+        if(a)await sleep(3000);
+        const body=JSON.stringify({key:c.apiKey,action:"upload",kind:"원본",filename,mime:it.blob.type||"image/jpeg",meta,data:await blobToB64(it.blob)});
+        const res=await fetch(c.apiUrl,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body});
+        const j=await res.json();
+        if(!j.ok)throw new Error(j.error||"upload");
+        done=true;
+      }catch(e){}
+    }
+    done?ok++:fail++;
+  }
+  if(dbRef)dbRef.child("driveLog/"+rid).set({ok,fail,ts:Date.now()}).catch(()=>{});
+  return {ok,fail};
+}
+
+/* 카메라가 안 될 때: 사진 파일을 줄여서(최대 900px JPEG) 저장 — 선생님 화면에서 바로 확인 */
 function uploadProof(rid,file){
   if(!file||!dbRef)return;
   const msg=document.getElementById("proofMsg");
@@ -1225,7 +1560,7 @@ function uploadProof(rid,file){
     URL.revokeObjectURL(url);
     const data=cv.toDataURL("image/jpeg",0.7);
     dbRef.child("photos/"+rid).set({data,ts:Date.now()})
-      .then(()=>{if(msg)msg.textContent="✅ 올렸어요! 선생님께 확인을 받으세요.";})
+      .then(()=>{if(msg)msg.textContent="✅ 올렸어요! 선생님께 확인을 받으세요.";driveUpload([{blob:file,kind:"photo",ext:(file.type.split("/")[1]||"jpg").replace("jpeg","jpg")}],rid);})
       .catch(e=>{if(msg)msg.textContent="올리지 못했어요: "+e.message;});
   };
   img.onerror=()=>{if(msg)msg.textContent="사진을 읽지 못했어요. 다시 찍어주세요.";};
@@ -1324,7 +1659,8 @@ function renderRoomDetail(rid){
   if(r.photoProof){
     const p=photos[rid];
     h+='<div class="photo-box"><b style="font-size:14px;">📸 인증샷</b>'
-      +'<div style="margin-top:8px;"><label class="btn btn-sub" style="display:inline-block;padding:10px 16px;font-size:14px;">📸 인증샷 찍기<input type="file" accept="image/*" capture="environment" style="display:none" onchange="uploadProof(\''+rid+'\',this.files[0])"></label></div>'
+      +'<div style="margin-top:8px;"><button class="btn btn-primary" style="padding:12px 18px;font-size:15px;" onclick="openProofCamera(\''+rid+'\')">📸 '+(p&&p.data?'인증샷 다시 찍기':'인증샷 찍기')+' (5초 뒤 찰칵)</button></div>'
+      +'<div style="margin-top:8px;font-size:11px;"><label style="text-decoration:underline;cursor:pointer;color:var(--gs-ink-brown-2);">카메라가 안 켜지면 사진 파일로 올리기<input type="file" accept="image/*" capture="environment" style="display:none" onchange="uploadProof(\''+rid+'\',this.files[0])"></label></div>'
       +'<div id="proofMsg" style="font-size:12px;margin-top:6px;font-weight:700;"></div>'
       +(p&&p.data?'<img src="'+p.data+'" alt="인증샷">':'')+'</div>';
   }
@@ -1332,9 +1668,56 @@ function renderRoomDetail(rid){
   h+='<button class="btn btn-lg btn-sub" style="margin-top:14px;max-width:520px;display:block;margin-left:auto;margin-right:auto;" onclick="goHome()">← 교실 지도로</button>';
   app.innerHTML=h;
 }
+/* ===================== 제한 시간 미션 (숟가락 탁구공 릴레이) =====================
+   첫 사람이 시작 → 마지막 사람이 완료. 제한 시간 안에 완료하면 선생님 없이도 자동으로 미션 성공 처리 */
+const fmtSec=s=>{s=Math.max(0,Math.ceil(s));return Math.floor(s/60)+":"+String(s%60).padStart(2,"0");};
+function timerHtml(rid){
+  const lim=roomOf(rid).timer,t=timers[rid]||{};
+  if(t.start){
+    const left=lim-(Date.now()-t.start)/1000;
+    return '<div class="wait-box"><div style="font-size:13px;">⏱ 남은 시간</div><div class="timer-disp" id="timerDisp">'+fmtSec(left)+'</div>'
+      +'<div style="font-size:13px;">마지막 친구까지 옮기면 마지막 친구가 눌러요!</div></div>'
+      +'<button class="btn btn-lg btn-green" style="margin-top:10px;font-size:22px;padding:20px;" onclick="finishTimer(\''+rid+'\')">🏁 완료!</button>'
+      +'<button class="btn btn-sub" style="margin-top:8px;padding:10px 14px;font-size:13px;" onclick="resetTimer(\''+rid+'\')">공이 떨어졌어요 · 처음부터 다시</button>';
+  }
+  let h='';
+  if(t.fail)h+='<div class="fb-box fb-bad">⏰ '+(t.sec?fmtSec(t.sec)+' 걸렸어요. ':'')+fmtSec(lim)+'이 지났어요! 다시 도전해요 💪</div>';
+  return h+'<div class="wait-box">🟡 <b>우리 조 미션 진행 중!</b><br>준비가 되면 <b>첫 번째 친구</b>가 아래 버튼을 눌러요.<br>'+fmtSec(lim)+' 안에 마지막 친구까지 옮기면 성공!</div>'
+    +'<button class="btn btn-lg btn-primary" style="margin-top:10px;font-size:22px;padding:20px;" onclick="startTimer(\''+rid+'\')">▶ 시작하기</button>';
+}
+function startTimer(rid){
+  if(window.Sfx)Sfx.unlock();
+  dbRef.child("timers/"+rid).set({start:Date.now()});
+}
+function resetTimer(rid){
+  if(!confirm("타이머를 멈추고 처음부터 다시 할까요?"))return;
+  dbRef.child("timers/"+rid).remove();
+}
+function finishTimer(rid){
+  const t=timers[rid];
+  if(!t||!t.start)return;
+  const sec=(Date.now()-t.start)/1000,lim=roomOf(rid).timer;
+  if(sec>lim){dbRef.child("timers/"+rid).set({fail:true,sec,ts:Date.now()});return;}
+  const updates={};
+  updates["team"+team+"/missions/"+rid]={ok:true,ts:Date.now(),by:"timer",sec:Math.round(sec*10)/10};
+  updates["team"+team+"/timers/"+rid]={done:true,sec:Math.round(sec*10)/10};
+  if(occupy[rid]&&String(occupy[rid].team)===team)updates["occupy/"+rid]=null; // 다른 조가 바로 쓸 수 있게 교실 비우기
+  dbRoot.update(updates);
+}
+setInterval(()=>{ // 남은 시간 표시 · 시간이 다 되면 실패 처리
+  if(appMode!=="student"||view!=="roomDetail"||!dbRef)return;
+  const rid=currentRoomDetailId,t=timers[rid],r=roomOf(rid);
+  if(!r||!r.timer||!t||!t.start||roomState(rid)!=="mine")return;
+  const left=r.timer-(Date.now()-t.start)/1000;
+  const el=document.getElementById("timerDisp");
+  if(el){el.textContent=fmtSec(left);el.style.color=left<=10?"var(--gs-red)":"";}
+  if(left<=0&&!t.failing){t.failing=true;if(window.Sfx)Sfx.loud("slam",0.6);dbRef.child("timers/"+rid).set({fail:true,ts:Date.now()});}
+},250);
 function statusHtml(rid,st,o){
   if(st==="done")return '<div class="fb-box fb-ok"><img src="assets/status_success.png" alt="">미션 성공! 이 교실의 열쇠를 얻었어요 🔑</div>';
   if(st==="busy")return '<div class="wait-box" style="color:var(--gs-red)">🔴 지금 <b>'+escapeHtml(o.team)+'조</b>가 이 교실에서 미션 중이에요.<br>다른 빈 교실(🟢)에 먼저 가보세요! 비면 바로 화면이 바뀌어요.</div>';
+  if(st==="mine"&&roomOf(rid).timer>0)return timerHtml(rid)
+    +'<div style="margin-top:8px;font-size:12px;"><span style="text-decoration:underline;cursor:pointer;color:var(--gs-ink-brown-2);" onclick="leaveMission(\''+rid+'\')">미션 그만두고 교실 비우기</span></div>';
   if(st==="mine")return '<div class="wait-box">🟡 <b>우리 조 미션 진행 중!</b><br>미션에 성공하면 선생님께 <b>"미션 성공"</b>을 눌러달라고 하세요.<br>선생님이 누르면 이 화면이 자동으로 바뀌어요.</div>'
     +'<div style="margin-top:8px;font-size:12px;"><span style="text-decoration:underline;cursor:pointer;color:var(--gs-ink-brown-2);" onclick="leaveMission(\''+rid+'\')">미션 그만두고 교실 비우기</span></div>';
   return '<div class="wait-box" style="color:var(--gs-green)">🟢 지금 비어 있어요! 교실에 도착하면 아래 버튼을 눌러주세요.</div>'
@@ -1441,6 +1824,7 @@ function connectTeam(){
     const d=snap.val()||{};
     missions=d.missions||{};
     photos=d.photos||{};
+    timers=d.timers||{};
     handleMissionChanges();
     if(view==="home")renderHome();
     else if(view==="roomDetail")renderRoomDetail(currentRoomDetailId);
