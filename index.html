@@ -716,8 +716,10 @@ function renderGuideTab(targetId){
       +'<div style="margin-top:8px;font-size:12px;color:var(--tx2);">어려우시면 <button class="btn btn-sub" style="padding:4px 10px;font-size:11px" onclick="goToRandomSchoolCode()">🎲 자동으로 만들기</button></div>';
   }
   h+=guideStep(1,"주소 준비하기",["학생용 주소 하나로 조장 태블릿과 선생님 휴대폰 모두 접속해요."],s1);
-  let s2='<div class="guide-link-box"><span style="font-size:12px;color:var(--tx2);">관리자 비밀번호</span><code>'+escapeHtml(SCHOOL_ADMIN_PW||"escape2026")+'</code></div>';
-  if(SCHOOL_ID)s2+='<div class="guide-link-box" style="margin-top:8px;"><span style="font-size:12px;color:var(--tx2);">비밀번호 바꾸기</span><input type="text" id="customPwInput" placeholder="새 비밀번호 (4자 이상)" style="flex:1;min-width:140px;padding:6px 8px;font-size:13px;border:1px solid var(--bdr);border-radius:6px;"><button class="btn btn-primary" style="padding:6px 12px;font-size:12px" onclick="setCustomAdminPw()">바꾸기</button></div>';
+  // 사용설명서는 비밀번호 없이 누구나(학생 포함) 열 수 있으므로, 관리자로 로그인한 경우에만 비밀번호를 보여준다
+  const isAdmin=sessionStorage.getItem("mission_admin_ok")==="1";
+  let s2='<div class="guide-link-box"><span style="font-size:12px;color:var(--tx2);">관리자 비밀번호</span><code>'+(isAdmin?escapeHtml(SCHOOL_ADMIN_PW||"escape2026"):"🔒 관리자 모드에서만 보여요")+'</code></div>';
+  if(SCHOOL_ID&&isAdmin)s2+='<div class="guide-link-box" style="margin-top:8px;"><span style="font-size:12px;color:var(--tx2);">비밀번호 바꾸기</span><input type="text" id="customPwInput" placeholder="새 비밀번호 (4자 이상)" style="flex:1;min-width:140px;padding:6px 8px;font-size:13px;border:1px solid var(--bdr);border-radius:6px;"><button class="btn btn-primary" style="padding:6px 12px;font-size:12px" onclick="setCustomAdminPw()">바꾸기</button></div>';
   h+=guideStep(2,"관리자 비밀번호",["조 선택 화면 맨 아래 <b>⚙️ 관리자 모드</b>에 이 비밀번호를 넣으면 관리자 페이지로 들어가요.","각 교실을 맡은 선생님들께도 이 비밀번호를 알려주세요. (학생에게는 알려주지 마세요)"],s2);
   h+=guideStep(3,"조 개수 정하기 (🧑‍🤝‍🧑 학생 배정 탭)",[
     "기본은 <b>5개 조</b>예요. 조 개수만 정하면 명단 없이도 바로 쓸 수 있어요. (학생들이 자기 조를 알고 있으면 충분해요)",
